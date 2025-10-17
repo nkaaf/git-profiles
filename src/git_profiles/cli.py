@@ -78,6 +78,15 @@ class Cli:
 
         self._run(args)
 
+    @staticmethod
+    def _run(args) -> None:  # noqa: ANN001
+        """Execute the command selected by the user.
+
+        Args:
+            args: Parsed argparse arguments.
+        """
+        args.func(args)
+
     def _evaluate_git_path(self) -> str:
         """Locate the `git` executable in the system PATH.
 
@@ -94,14 +103,6 @@ class Cli:
             self._outputter.log("[!] 'git' is not available.")
             raise ExitError
         return path
-
-    def _run(self, args) -> None:  # noqa: ANN001
-        """Execute the command selected by the user.
-
-        Args:
-            args: Parsed argparse arguments.
-        """
-        args.func(args)
 
     def _handle_set(self, args) -> None:  # noqa: ANN001
         """Set a key=value pair in a profile.
