@@ -2,7 +2,8 @@
 # See https://pre-commit.com/hooks.html for more hooks
 ci:
   skip: [uv-lock]
-exclude: ^gen/.*
+  autofix_prs: true
+  autoupdate_schedule: weekly
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -39,12 +40,12 @@ repos:
     -   id: sort-simple-yaml
     -   id: trailing-whitespace
 - repo: https://github.com/astral-sh/uv-pre-commit
-  rev: 0.8.17
+  rev: 0.9.3
   hooks:
     - id: uv-lock
     - id: uv-sync
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.13.0
+  rev: v0.14.1
   hooks:
     - id: ruff-check
     - id: ruff-format

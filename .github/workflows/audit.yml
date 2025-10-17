@@ -1,0 +1,92 @@
+name: "Audit"
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Branch name or commit SHA to scan'
+        required: true
+
+env:
+  TARGET_REF: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.ref || github.ref }}
+
+jobs:
+  linting:
+    name: "Linting"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5.0.0
+        with:
+          ref: ${{ env.TARGET_REF }}
+
+      - name: Run Ruff
+        uses: astral-sh/ruff-action@57714a7c8a2e59f32539362ba31877a1957dded1 # v3.5.1
+
+  testing:
+    name: "Testing"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        python-version: [ "3.10", "3.11", "3.12", "3.13", "3.14" ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5.0.0
+        with:
+          ref: ${{ env.TARGET_REF }}
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v6.0.0
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@3259c6206f993105e3a61b142c2d97bf4b9ef83d # v7.1.0
+        with:
+          enable-cache: true
+          save-cache: true
+          restore-cache: true
+
+      - name: Install project dependencies
+        run: |
+          uv sync
+
+      - name: Cache tox environments
+        uses: actions/cache@v4.3.0
+        with:
+          path: .tox
+          key: ${{ runner.os }}-tox-${{ hashFiles('pyproject.toml', 'tox.ini') }}
+
+      - name: Run Tox
+        run: |
+          tox
+  audit:
+    name: "Audit"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5.0.0
+        with:
+          ref: ${{ env.TARGET_REF }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@3259c6206f993105e3a61b142c2d97bf4b9ef83d # v7.1.0
+        with:
+          enable-cache: true
+          save-cache: true
+          restore-cache: true
+
+      - name: Audit
+        uses: pypa/gh-action-pip-audit@1220774d901786e6f652ae159f7b6bc8fea6d266 # v1.1.0
+        with:
+          inputs: '.'

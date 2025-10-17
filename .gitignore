@@ -9,5 +9,8 @@ wheels/
 # Virtual environments
 .venv
 
+# Tox
+.tox
+
 # Jetbrains
 .idea
