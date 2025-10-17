@@ -1,6 +1,6 @@
 # git-profiles
 
-![PyPI - Status](https://img.shields.io/pypi/status/git-profiles)
+![PyPI - Status](https://img.shields.io/pypi/status/git-profiles?style=for-the-badge)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/git-profiles?style=for-the-badge)
 ![PyPI - License](https://img.shields.io/pypi/l/git-profiles?style=for-the-badge)
 ![Codecov](https://img.shields.io/codecov/c/github/nkaaf/git-profiles?style=for-the-badge)
