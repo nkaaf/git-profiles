@@ -1,12 +1,13 @@
 # git-profiles
 
-![PyPI - Status](https://img.shields.io/pypi/status/git-profiles?style=for-the-badge)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/git-profiles?style=for-the-badge)
-![PyPI - License](https://img.shields.io/pypi/l/git-profiles?style=for-the-badge)
-![Codecov](https://img.shields.io/codecov/c/github/nkaaf/git-profiles?style=for-the-badge)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/nkaaf/git-profiles/main.svg)](https://results.pre-commit.ci/latest/github/nkaaf/git-profiles/main)
+![PyPI - Status](https://img.shields.io/pypi/status/git-profiles)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/git-profiles)
+![PyPI - License](https://img.shields.io/pypi/l/git-profiles)
+![Codecov](https://img.shields.io/codecov/c/github/nkaaf/git-profiles)
 
-![PyPI - Version](https://img.shields.io/pypi/v/git-profiles?style=for-the-badge)
-![Homebrew Formula Version](https://img.shields.io/homebrew/v/git-profiles?style=for-the-badge)
+![PyPI - Version](https://img.shields.io/pypi/v/git-profiles)
+![Homebrew Formula Version](https://img.shields.io/homebrew/v/git-profiles)
 
 A **CLI tool to manage multiple Git configuration profiles**, allowing developers to switch between
 different identities and settings quickly. Profiles are stored persistently and can be applied to
@@ -251,8 +252,8 @@ For more information on the tools used in this project, you can visit their offi
   quality.
 * **[Poe the Poet](https://github.com/nat-n/poethepoet)** – Task runner that simplifies running
   scripts (like `lint` and `test`) defined in `pyproject.toml`.
-* **[Python Packaging Guide](https://packaging.python.org/en/latest/tutorials/packaging-projects/)
-  ** – Official guide for building, packaging, and distributing Python projects, including creating
+* **[Python Packaging Guide](https://packaging.python.org/en/latest/tutorials/packaging-projects/)**
+  – Official guide for building, packaging, and distributing Python projects, including creating
   source distributions and wheels.
 
 > 💡 These links provide detailed documentation, installation guides, and examples for each tool.
