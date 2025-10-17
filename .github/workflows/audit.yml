@@ -24,17 +24,29 @@ jobs:
         with:
           ref: ${{ env.TARGET_REF }}
 
-      - name: Run Ruff
-        uses: astral-sh/ruff-action@57714a7c8a2e59f32539362ba31877a1957dded1 # v3.5.1
+      - name: Set up Python
+        uses: actions/setup-python@v6.0.0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@3259c6206f993105e3a61b142c2d97bf4b9ef83d # v7.1.0
+        with:
+          enable-cache: true
+          save-cache: true
+          restore-cache: true
+
+      - name: Install project dependencies
+        run: |
+          uv sync
+
+      - name: Run tests
+        run: |
+          poe lint
 
   testing:
     name: "Testing"
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    strategy:
-      matrix:
-        python-version: [ "3.10", "3.11", "3.12", "3.13", "3.14" ]
 
     steps:
       - name: Checkout
@@ -42,10 +54,8 @@ jobs:
         with:
           ref: ${{ env.TARGET_REF }}
 
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python
         uses: actions/setup-python@v6.0.0
-        with:
-          python-version: ${{ matrix.python-version }}
 
       - name: Install uv
         uses: astral-sh/setup-uv@3259c6206f993105e3a61b142c2d97bf4b9ef83d # v7.1.0
@@ -64,9 +74,9 @@ jobs:
           path: .tox
           key: ${{ runner.os }}-tox-${{ hashFiles('pyproject.toml', 'tox.ini') }}
 
-      - name: Run Tox
+      - name: Run tests
         run: |
-          tox
+          poe test
   audit:
     name: "Audit"
     runs-on: ubuntu-latest

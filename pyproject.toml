@@ -40,8 +40,12 @@ Repository = "https://github.com/nkaaf/git-profiles"
 "Bug Tracker" = "https://github.com/nkaaf/git-profiles/issues"
 Releases = "https://github.com/nkaaf/git-profiles/releases"
 
+[project.scripts]
+git-profiles = "git_profiles.__main__:main"
+
 [dependency-groups]
 dev = [
+    "poethepoet>=0.37.0",
     "pre-commit>=2.21.0",
     "pytest>=8.4.2",
     "ruff>=0.14.1",
@@ -76,6 +80,10 @@ convention = "google"
 [tool.tox]
 requires = ["tox-uv"]
 envlist = ["py310", "py311", "py312", "py313", "py314"]
+
+[tool.poe.tasks]
+lint = "pre-commit run --all-files"
+test = "tox"
 
 [testenv]
 commands = ["pytest tests"]
