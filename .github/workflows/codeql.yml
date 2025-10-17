@@ -35,11 +35,6 @@ jobs:
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4.30.8
 
-      - name: Upload CodeQL results to GitHub
-        uses: github/codeql-action/upload-sarif@v4.30.8
-        with:
-          sarif_file: codeql-analysis.sarif
-
   codeql-actions:
     name: "CodeQL GitHub Actions Scan"
     runs-on: ubuntu-latest
@@ -65,8 +60,3 @@ jobs:
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4.30.8
-
-      - name: Upload CodeQL results to GitHub
-        uses: github/codeql-action/upload-sarif@v4.30.8
-        with:
-          sarif_file: codeql-analysis.sarif
