@@ -174,33 +174,38 @@ git profiles -q apply work
 
 ## Development
 
-> 💡 Note: Make sure you have uv installed on your system. It is the dependency manager used to
-> install dev dependencies and run project commands.
+> 💡 **Prerequisite:** Make sure you have **uv installed** on your system. It is the dependency
+> manager used to install dev dependencies, manage Python interpreters, and run project commands.
 
-Get your development environment ready in just a few steps:
+Get your development environment ready in a few steps:
 
 ```bash
-# 1. Install all dev dependencies (pytest, tox, ruff, pre-commit, etc.)
+# 1. Install all development dependencies (pytest, tox, ruff, pre-commit, etc.)
 uv sync
 
 # 2. Install pre-commit git hooks
 pre-commit install
 ```
 
-> 💡 After this, your environment is ready to run tests and linting.
+> 💡 After this, your environment is ready to run tests, linting, and builds.
+
+> ⚠️ **Important:** Always run commands via `uv run poe <script>` (e.g., `uv run poe lint`,
+`uv run poe test`).
+> This ensures the correct uv-managed environment is used. Running `poe` or `tox` directly may fail
+> if the environment isn’t active, especially on CI runners.
+
+---
 
 ### Linting
 
 ```bash
-# Run linting on all files
-poe lint
+# Run all linting checks
+uv run poe lint
 ```
 
-> ℹ️ `poe lint` is an uv-compatible shortcuts defined in the pyproject.toml scripts, which runs
-> `pre-commit`.
-
+> ℹ️ This internally runs `pre-commit` using the uv-managed environment.
 > 💡 Commits automatically trigger pre-commit hooks after `pre-commit install`.
-> If any hook fails (e.g., lint errors), the commit is blocked until you fix them.
+> If any hook fails (e.g., lint errors), the commit is blocked until fixed.
 
 ---
 
@@ -208,25 +213,22 @@ poe lint
 
 ```bash
 # Run all test environments defined in pyproject.toml
-poe test
+uv run poe test
 ```
 
-> ℹ️ `poe test` is an uv-compatible shortcuts defined in the pyproject.toml scripts, which runs
-> `tox`.
-
-> ⚠️ **Note:** Tox requires the Python interpreters listed in `[tool.tox].envlist` to be
-> installed.
-> With the `tox-uv` plugin, missing interpreters will be automatically installed.
-> You can also install specific versions manually using `uv python install <version>`.
+> ℹ️ This internally runs `tox` using the uv-managed environment.
+> ⚠️ **Note:** Tox requires the Python interpreters listed in `[tool.tox].envlist`.
+> With the `tox-uv` plugin, missing interpreters are installed automatically.
+> You can also install specific Python versions manually with `uv python install <version>`.
 
 ---
 
 ### Building
 
-You can build the `git-profiles` package locally for testing or distribution using **uv**:
+You can build the `git-profiles` package locally for testing or distribution:
 
 ```bash
-# Make sure your development environment is synced
+# Ensure your development environment is synced
 uv sync
 
 # Build both wheel and source distribution

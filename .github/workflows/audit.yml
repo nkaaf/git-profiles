@@ -40,7 +40,7 @@ jobs:
 
       - name: Run tests
         run: |
-          poe lint
+          uv run poe lint
 
   testing:
     name: "Testing"
@@ -76,7 +76,7 @@ jobs:
 
       - name: Run tests
         run: |
-          poe test
+          uv run poe test
   audit:
     name: "Audit"
     runs-on: ubuntu-latest
