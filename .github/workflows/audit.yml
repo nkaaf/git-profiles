@@ -38,7 +38,7 @@ jobs:
         run: |
           uv sync
 
-      - name: Run tests
+      - name: Run linting
         run: |
           uv run poe lint
 
@@ -77,6 +77,7 @@ jobs:
       - name: Run tests
         run: |
           uv run poe test
+
   audit:
     name: "Audit"
     runs-on: ubuntu-latest

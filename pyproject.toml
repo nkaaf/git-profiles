@@ -33,7 +33,6 @@ license-files = [
 dependencies = [
     "platformdirs>=4.5.0",
     "pydantic>=2.12.2",
-    "uv-build>=0.9.3",
 ]
 
 [project.urls]
