@@ -43,7 +43,7 @@ jobs:
           path: dist/
 
   publish:
-    if: startsWith(github.ref, 'refs/tags')
+    if: startsWith(github.ref, 'refs/tags') || (github.event_name == 'workflow_dispatch' && github.event.inputs.test == 'true')
     name: "Publish"
     runs-on: ubuntu-latest
     permissions:
