@@ -7,7 +7,6 @@
 ![Codecov](https://img.shields.io/codecov/c/github/nkaaf/git-profiles)
 
 ![PyPI - Version](https://img.shields.io/pypi/v/git-profiles)
-![Homebrew Formula Version](https://img.shields.io/homebrew/v/git-profiles)
 
 A **CLI tool to manage multiple Git configuration profiles**, allowing developers to switch between
 different identities and settings quickly. Profiles are stored persistently and can be applied to
@@ -30,39 +29,70 @@ local Git repositories with ease.
 
 ## Installation
 
-### Install from PyPI
+> ⚠️ **Note:** The recommended method is via **pipx**. If `pipx` is not installed, you can fall back
+> to `pip` or other methods below.
+
+---
+
+### 1️⃣ Recommended: Install via **pipx** (isolated and global CLI)
+
+`pipx` installs Python CLI tools in isolated environments while making them available system-wide.
+This prevents conflicts with other Python packages and keeps your environment clean:
 
 ```bash
+pipx install git-profiles
+```
+
+---
+
+### 2️⃣ Alternative: Install via **pip** (inside a virtual environment recommended)
+
+If `pipx` is not available, you can use `pip`. It is recommended to install inside a virtual
+environment to avoid polluting your global Python packages:
+
+```bash
+# Optional: create a virtual environment
+python3 -m venv ~/.venvs/git-profiles
+source ~/.venvs/git-profiles/bin/activate
+
+# Install the package
 pip install git-profiles
 ```
 
-### Install via Homebrew (macOS / Linux)
+---
+
+### 3️⃣ Alternative: Install via **Homebrew** (macOS / Linux)
 
 ```bash
 brew install nkaaf/tap/git-profiles
 ```
 
-### Development Installation
+> ⚡ Makes `git-profiles` globally available. Recommended if you already manage packages with
+> Homebrew.
 
-Clone the repository and install in editable mode using `uv`:
+---
+
+### 4️⃣ Development Installation (Editable / Contributing)
+
+Clone the repository and install in **editable mode** using `uv`:
 
 ```bash
 git clone https://github.com/nkaaf/git-profiles.git
 cd git-profiles
 
-# Ensure dependencies are exactly in sync with the lockfile
+# Ensure dependencies match the lockfile
 uv sync
 ```
 
-> This allows you to modify the source code while testing. Make sure uv is installed on your system;
-> it is used to manage dependencies and run project commands.
+> ⚡ This allows you to modify the source code while testing. Make sure `uv` is installed; it manages
+> dependencies and project commands.
 
 ---
 
 ## Usage
 
-After installation (via PyPI, Homebrew, or the development workflow), you can use `git-profiles` in
-**three ways**:
+After installation (via pipx, pip, Homebrew, or the development workflow), you can use
+`git-profiles` in **three ways**:
 
 1. **Global CLI (recommended fallback):**
 
@@ -252,9 +282,13 @@ For more information on the tools used in this project, you can visit their offi
   quality.
 * **[Poe the Poet](https://github.com/nat-n/poethepoet)** – Task runner that simplifies running
   scripts (like `lint` and `test`) defined in `pyproject.toml`.
+* **[pipx](https://pipxproject.github.io/)** – Install and run Python CLI tools in isolated
+  environments while making them available globally.
 * **[Python Packaging Guide](https://packaging.python.org/en/latest/tutorials/packaging-projects/)**
   – Official guide for building, packaging, and distributing Python projects, including creating
   source distributions and wheels.
+* **[Homebrew](https://brew.sh/)** – Popular package manager for macOS and Linux, used to install
+  CLI tools and dependencies system-wide.
 
 > 💡 These links provide detailed documentation, installation guides, and examples for each tool.
 > They’re especially useful if you’re new to Python project tooling.
