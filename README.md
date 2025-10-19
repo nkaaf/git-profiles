@@ -275,14 +275,14 @@ uv build
 
 For more information on the tools used in this project, you can visit their official documentation:
 
-* **[uv](https://astral-sh.github.io/uv/)** – Dependency manager for Python projects, used here to
+* **[uv](https://docs.astral.sh/uv/)** – Dependency manager for Python projects, used here to
   manage dev dependencies and Python interpreters.
-* **[tox](https://tox.readthedocs.io/)** – Automate testing across multiple Python versions.
+* **[tox](https://tox.wiki/)** – Automate testing across multiple Python versions.
 * **[pre-commit](https://pre-commit.com/)** – Manage and run pre-commit hooks to ensure code
   quality.
-* **[Poe the Poet](https://github.com/nat-n/poethepoet)** – Task runner that simplifies running
+* **[Poe the Poet](https://poethepoet.natn.io/)** – Task runner that simplifies running
   scripts (like `lint` and `test`) defined in `pyproject.toml`.
-* **[pipx](https://pipxproject.github.io/)** – Install and run Python CLI tools in isolated
+* **[pipx](https://pipx.pypa.io/stable/)** – Install and run Python CLI tools in isolated
   environments while making them available globally.
 * **[Python Packaging Guide](https://packaging.python.org/en/latest/tutorials/packaging-projects/)**
   – Official guide for building, packaging, and distributing Python projects, including creating
@@ -310,3 +310,12 @@ The repository’s CI pipelines automatically run:
 ## License
 
 Apache License 2.0 – see [LICENSE](LICENSE) for details.
+
+---
+
+## Acknowledgements
+
+This project depends on the following open source libraries:
+
+- [platformdirs](https://github.com/tox-dev/platformdirs) — MIT License
+- [pydantic](https://github.com/pydantic/pydantic) — MIT License
