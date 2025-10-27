@@ -18,16 +18,16 @@ jobs:
         uses: actions/checkout@v5.0.0
 
       - name: Initialize CodeQL (Python)
-        uses: github/codeql-action/init@v4.30.9
+        uses: github/codeql-action/init@v4.31.0
         with:
           languages: python
           queries: security-and-quality,security-extended
 
       - name: Autobuild
-        uses: github/codeql-action/autobuild@v4.30.9
+        uses: github/codeql-action/autobuild@v4.31.0
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4.30.9
+        uses: github/codeql-action/analyze@v4.31.0
 
   codeql-actions:
     name: "CodeQL GitHub Actions Scan"
@@ -42,13 +42,13 @@ jobs:
         uses: actions/checkout@v5.0.0
 
       - name: Initialize CodeQL (Actions)
-        uses: github/codeql-action/init@v4.30.9
+        uses: github/codeql-action/init@v4.31.0
         with:
           languages: actions
           queries: security-and-quality,security-extended
 
       - name: Autobuild
-        uses: github/codeql-action/autobuild@v4.30.9
+        uses: github/codeql-action/autobuild@v4.31.0
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4.30.9
+        uses: github/codeql-action/analyze@v4.31.0
