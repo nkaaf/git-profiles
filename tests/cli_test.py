@@ -79,6 +79,7 @@ def test_execution_via_module_success() -> None:
     ).decode(ENCODING)
     assert VERSION in output
 
+
 def test_execution_via_module_error() -> None:
     with (
         tempfile.NamedTemporaryFile('r+', encoding=ENCODING) as temp_file,
