@@ -45,16 +45,19 @@ git-profiles = "git_profiles.__main__:main"
 
 [dependency-groups]
 dev = [
+    "mypy>=1.18.2",
     "poethepoet>=0.37.0",
     "pre-commit>=2.21.0",
     "pytest>=8.4.2",
+    "pytest-cov>=7.0.0",
     "ruff>=0.14.1",
     "tox>=4.31.0",
     "tox-uv>=1.29.0",
+    "uv-build>=0.9.7",
 ]
 
 [build-system]
-requires = ["uv_build>=0.9.3,<0.10.0"]
+requires = ["uv_build"]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]
@@ -77,13 +80,42 @@ inline-quotes = "single"
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D", "INP001", "S101"]
+
 [tool.tox]
 requires = ["tox-uv"]
 envlist = ["py310", "py311", "py312", "py313", "py314"]
 
-[tool.poe.tasks]
-lint = "pre-commit run --all-files"
-test = "tox"
+[tool.tox.env_run_base]
+deps = ["pytest", "pytest-cov", "faker"]
+package = "editable"
+commands = [["pytest", "tests", "--cov", "--cov-append", "--cov-report=term-missing", "--cov-report=xml", "--junitxml=junit.xml", "-o junit_family=legacy"]]
 
-[testenv]
-commands = ["pytest tests"]
+[tool.coverage.run]
+source = ["src"]
+
+# https://coverage.readthedocs.io/en/7.11.0/excluding.html#advanced-exclusion
+[tool.coverage.report]
+exclude_also = [
+    'def __repr__',
+    'if self.debug:',
+    'if settings.DEBUG',
+    'raise AssertionError',
+    'raise NotImplementedError',
+    'if 0:',
+    'if __name__ == .__main__.:',
+    'if TYPE_CHECKING:',
+    'class .*\bProtocol\):',
+    '@(abc\.)?abstractmethod',
+]
+
+[tool.mypy]
+files = ["src"]
+strict = true
+
+[tool.poe.tasks]
+mypy = "mypy"
+pre-commit = "pre-commit run --all-files"
+lint = ["mypy", "pre-commit"]
+test = "tox"

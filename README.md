@@ -2,11 +2,11 @@
 
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/nkaaf/git-profiles/main.svg)](https://results.pre-commit.ci/latest/github/nkaaf/git-profiles/main)
 ![PyPI - Status](https://img.shields.io/pypi/status/git-profiles)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/git-profiles)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/git-profiles?logo=python)
 ![PyPI - License](https://img.shields.io/pypi/l/git-profiles)
-![Codecov](https://img.shields.io/codecov/c/github/nkaaf/git-profiles)
+![Codecov](https://img.shields.io/codecov/c/github/nkaaf/git-profiles?logo=codecov&logoColor=%23b&link=https%3A%2F%2Fcodecov.io%2Fgh%2Fnkaaf%2Fgit-profiles)
 
-![PyPI - Version](https://img.shields.io/pypi/v/git-profiles)
+![PyPI - Version](https://img.shields.io/pypi/v/git-profiles?logo=pypi&link=https%3A%2F%2Fpypi.org%2Fproject%2Fgit-profiles%2F)
 
 A **CLI tool to manage multiple Git configuration profiles**, allowing developers to switch between
 different identities and settings quickly. Profiles are stored persistently and can be applied to

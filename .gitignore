@@ -14,3 +14,8 @@ wheels/
 
 # Jetbrains
 .idea
+
+# Pytest
+.coverage
+coverage.xml
+junit.xml
