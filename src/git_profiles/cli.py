@@ -39,7 +39,7 @@ from pathlib import Path
 
 from git_profiles.const import PROGRAM_NAME
 from git_profiles.output import Outputter
-from git_profiles.storage import ConfigLoadError, DictMergeConflictError, Storage
+from git_profiles.storage import ConfigLoadError, Storage
 
 __all__ = ['Cli', 'ExitError']
 
@@ -80,7 +80,7 @@ class Cli:
 
         self._run(args)
 
-    def _run(self, args: argparse.Namespace) -> None:  # noqa: C901
+    def _run(self, args: argparse.Namespace) -> None:
         """Execute the command selected by the user.
 
         Args:
@@ -103,10 +103,6 @@ class Cli:
                 self._handle_duplicate(args.src, args.dest)
             case self._handle_version:
                 self._handle_version()
-            case self._handle_import:
-                self._handle_import(Path(args.src), force=args.force)
-            case self._handle_export:
-                self._handle_export(Path(args.dest))
 
     def _evaluate_git_path(self) -> str:
         """Locate the `git` executable in the system PATH.
