@@ -41,9 +41,10 @@ ENCODING = 'utf-8'
 
 
 def test_execution_via_git_success() -> None:
-    assert VERSION in subprocess.check_output(  # noqa: S603
+    output = subprocess.check_output(  # noqa: S603
         [GIT_EXECUTABLE, 'profiles', 'version']
     ).decode(ENCODING)
+    assert VERSION in output
 
 
 def test_execution_via_git_error() -> None:
