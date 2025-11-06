@@ -74,10 +74,10 @@ def test_execution_via_git_argparse_error() -> None:
 
 
 def test_execution_via_module_success() -> None:
-    assert VERSION in subprocess.check_output(  # noqa: S603
+    output = subprocess.check_output(  # noqa: S603
         [PYTHON_EXECUTABLE, '-m', 'git_profiles', 'version']
     ).decode(ENCODING)
-
+    assert VERSION in output
 
 def test_execution_via_module_error() -> None:
     with (
