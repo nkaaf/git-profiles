@@ -254,6 +254,7 @@ class Cli:
 
     def _handle_version(self) -> None:
         self._outputter.log(importlib.metadata.version('git-profiles'))
+
     def _build_parser(self) -> argparse.ArgumentParser:
         """Build the argument parser with all subcommands and options.
 
