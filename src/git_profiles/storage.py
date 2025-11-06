@@ -36,7 +36,7 @@ from platformdirs import PlatformDirs
 from pydantic import RootModel
 from pydantic import ValidationError as PydanticValidationError
 
-from .const import PROGRAM_NAME
+from git_profiles.const import PROGRAM_NAME
 
 __all__ = ['ConfigLoadError', 'Storage']
 

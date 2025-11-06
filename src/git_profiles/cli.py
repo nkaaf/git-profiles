@@ -35,9 +35,9 @@ import contextlib
 import shutil
 import subprocess
 
-from .const import PROGRAM_NAME
-from .output import Outputter
-from .storage import ConfigLoadError, Storage
+from git_profiles.const import PROGRAM_NAME
+from git_profiles.output import Outputter
+from git_profiles.storage import ConfigLoadError, DictMergeConflictError, Storage
 
 __all__ = ['Cli', 'ExitError']
 
