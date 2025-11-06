@@ -117,6 +117,9 @@ strict = true
 
 [tool.poe.tasks]
 mypy = "mypy"
+ruff_check = "ruff check"
+ruff_format = "ruff format"
+ruff = ["ruff_check", "ruff_format"]
 pre-commit = "pre-commit run --all-files"
-lint = ["mypy", "pre-commit"]
+lint = ["mypy", "ruff"]
 test = "tox"
