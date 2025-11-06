@@ -42,6 +42,7 @@ __all__ = ['ConfigLoadError', 'DictMergeConflictError', 'Storage']
 
 ProfileType = dict[str, str]
 ConfigType = dict[str, ProfileType]
+ConflictsType = dict[str, dict[str, tuple[str, str]]]
 
 
 class ProfileModel(RootModel[ProfileType]):
@@ -75,6 +76,13 @@ class ValidationError(ValueError):
     """
 
     def __init__(self, key: str, value: str, message: str) -> None:
+        """Initialize a ValidationError.
+
+        Args:
+            key (str): Git config key.
+            value (str): Invalid value.
+            message (str): Error description.
+        """
         super().__init__(f'Invalid key/value pair: {key}={value!r}: {message}')
         self.key = key
         self.value = value
@@ -137,13 +145,16 @@ class Validator:
                 )
 
 
-ConflictsType = dict[str, dict[str, tuple[str, str]]]
-
-
 class DictMergeConflictError(ValueError):
-    def __init__(self, conflicts: ConflictsType) -> None:
-        super().__init__()
+    """Raised when merging two configurations encounters conflicting keys."""
 
+    def __init__(self, conflicts: ConflictsType) -> None:
+        """Initialize DictMergeConflictError.
+
+        Args:
+            conflicts (ConflictsType): Mapping of conflicts by profile/key.
+        """
+        super().__init__()
         self.conflicts = conflicts
 
 
@@ -156,7 +167,11 @@ class Storage:
     STORAGE_FILE_PATH = PlatformDirs(PROGRAM_NAME).user_data_path / 'config.json'
 
     def __init__(self, config_file: Path) -> None:
-        """Initialize storage and load configuration."""
+        """Initialize storage and load configuration.
+
+        Args:
+            config_file (Path): Path to the JSON config file.
+        """
         self.config_file = config_file
         self.config_file.parent.mkdir(parents=True, exist_ok=True)
 
@@ -164,12 +179,19 @@ class Storage:
 
     @property
     def config(self) -> ConfigType:
-        """Return a copy of the current configuration."""
+        """Return a copy of the current configuration.
+
+        Returns:
+            ConfigType: Copy of the profiles' dictionary.
+        """
         return self._config.copy()
 
     @staticmethod
     def _load(file: Path) -> ConfigType:
         """Load and validate the configuration from disk.
+
+        Args:
+            file (Path): Path to JSON config file.
 
         Returns:
             ConfigType: Loaded config data.
@@ -271,6 +293,14 @@ class Storage:
         self._save()
 
     def export_storage(self, dest: Path) -> None:
+        """Export current configuration to a file.
+
+        Args:
+            dest (Path): Destination path for export.
+
+        Raises:
+            FileExistsError: If destination file already exists.
+        """
         dest.parent.mkdir(parents=True, exist_ok=True)
 
         if dest.is_file():
@@ -279,6 +309,16 @@ class Storage:
         dest.write_text(json.dumps(self._config))
 
     def import_storage(self, src: Path, *, force: bool) -> None:
+        """Import configuration from a file.
+
+        Args:
+            src (Path): Source file to import.
+            force (bool): If True, overwrite existing config. Otherwise merge.
+
+        Raises:
+            FileNotFoundError: If source file does not exist.
+            DictMergeConflictError: If merge conflicts occur and force=False.
+        """
         if not src.is_file():
             raise FileNotFoundError
 
@@ -291,6 +331,18 @@ class Storage:
 
     @staticmethod
     def _merge_config(config1: ConfigType, config2: ConfigType) -> ConfigType:
+        """Merge two configuration dictionaries.
+
+        Args:
+            config1 (ConfigType): Existing config.
+            config2 (ConfigType): New config to merge.
+
+        Returns:
+            ConfigType: Merged configuration.
+
+        Raises:
+            DictMergeConflictError: If conflicting keys are found.
+        """
         conflicts: ConflictsType = {}
 
         duplicated_profile_names = config1.keys() & config2.keys()

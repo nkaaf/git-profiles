@@ -16,17 +16,24 @@
 
 """CLI module for managing and applying Git configuration profiles.
 
-Provides the `Cli` class which handles argument parsing, command dispatch,
-and integrates with the `Storage` class to manage persistent profiles.
+This module provides the `Cli` class that implements a fully-featured
+command-line interface for creating, updating, applying, importing,
+exporting, and removing git configuration profiles.
+
+Profiles are stored persistently using the `Storage` class, and each
+profile consists of key-value pairs representing git config settings.
 
 Commands supported:
-- set
-- unset
-- apply
-- list
-- show
-- remove
-- duplicate
+- `set`      : Add or update a key=value in a profile
+- `unset`    : Remove a key from a profile
+- `apply`    : Apply a profile to the local git repository
+- `list`     : List all available profiles
+- `show`     : Show all key=value pairs for a profile
+- `remove`   : Delete a profile entirely
+- `duplicate`: Duplicate an existing profile under a new name
+- `version`  : Show the CLI version
+- `export`   : Export all profiles to a file
+- `import`   : Import profiles from a file with optional merge
 """
 
 import argparse
@@ -64,6 +71,10 @@ class Cli:
 
         Args:
             argv (list[str]): The list of command-line arguments.
+
+        Raises:
+            ExitError: If initialization fails, e.g., storage cannot be loaded
+                       or git executable is not available.
         """
         parser = self._build_parser()
         args = parser.parse_args(argv)
@@ -81,10 +92,12 @@ class Cli:
         self._run(args)
 
     def _run(self, args: argparse.Namespace) -> None:  # noqa: C901
-        """Execute the command selected by the user.
+        """Dispatch the CLI command based on parsed arguments.
 
         Args:
-            args: Parsed argparse arguments.
+            args (argparse.Namespace):  Parsed argparse arguments with a `.func`
+                                        attribute pointing to the correct command
+                                        handler.
         """
         match args.func:
             case self._handle_set:
@@ -115,7 +128,7 @@ class Cli:
             str: Full path to the `git` executable.
 
         Raises:
-            ExitError: If `git` is not found in the system PATH.
+            ExitError: If `git` is not found.
         """
         path = shutil.which('git')
         if path is None:
@@ -124,12 +137,17 @@ class Cli:
         return path
 
     def _handle_set(self, profile_name: str, key: str, value: str) -> None:
-        """Set a key=value pair in a profile.
+        """Add or update a key=value pair in a profile.
 
         Creates the profile if it does not exist.
 
         Args:
-            args: Parsed argparse arguments with 'name', 'key', and 'value'.
+            profile_name (str): Name of the profile to update.
+            key (str): Git configuration key (e.g., 'user.email').
+            value (str): Value to set for the key.
+
+        Raises:
+            ExitError: If key=value pair cannot be set.
         """
         try:
             added_profile = self._storage.set(profile_name, key, value)
@@ -148,7 +166,11 @@ class Cli:
         """Remove a key from a profile.
 
         Args:
-            args: Parsed argparse arguments with 'name' and 'key'.
+            profile_name (str): Name of the profile.
+            key (str): Git configuration key to remove.
+
+        Raises:
+            ExitError: If the profile does not exist.
         """
         try:
             self._storage.unset(profile_name, key)
@@ -159,10 +181,13 @@ class Cli:
         self._outputter.log(f"[x] Unset key '{key}' in profile '{profile_name}'")
 
     def _handle_apply(self, profile_name: str) -> None:
-        """Apply a profile's key-values to the local Git repository.
+        """Apply a profile to the local git repository.
 
         Args:
-            args: Parsed argparse arguments with 'name'.
+            profile_name (str): Name of the profile to apply.
+
+        Raises:
+            ExitError: If the profile does not exist.
         """
         try:
             profile = self._storage.get_profile(profile_name)
@@ -179,7 +204,11 @@ class Cli:
         )
 
     def _handle_list(self) -> None:
-        """List all available profiles."""
+        """List all available profiles.
+
+        Raises:
+            ExitError: If no profiles exist.
+        """
         profiles = self._storage.config.keys()
 
         if not profiles:
@@ -191,10 +220,13 @@ class Cli:
             self._outputter.log(f' - {name}')
 
     def _handle_show(self, profile_name: str) -> None:
-        """Show all key=value pairs for a profile.
+        """Display all key=value pairs of a profile.
 
         Args:
-            args: Parsed argparse arguments with 'name'.
+            profile_name (str): Name of the profile to show.
+
+        Raises:
+            ExitError: If the profile does not exist.
         """
         try:
             profile = self._storage.get_profile(profile_name)
@@ -207,10 +239,13 @@ class Cli:
             self._outputter.log(f'  {key} = {value}')
 
     def _handle_remove(self, profile_name: str) -> None:
-        """Delete a profile entirely.
+        """Delete a profile.
 
         Args:
-            args: Parsed argparse arguments with 'name'.
+            profile_name (str): Name of the profile to remove.
+
+        Raises:
+            ExitError: If the profile does not exist.
         """
         try:
             self._storage.remove(profile_name)
@@ -224,7 +259,11 @@ class Cli:
         """Duplicate a profile under a new name.
 
         Args:
-            args: Parsed argparse arguments with 'src' and 'dest'.
+            src (str): Source profile name.
+            dest (str): Destination profile name.
+
+        Raises:
+            ExitError: If source does not exist, destination exists, or merge fails.
         """
         try:
             src_profile = self._storage.get_profile(src)
@@ -253,9 +292,18 @@ class Cli:
             raise ExitError from e
 
     def _handle_version(self) -> None:
+        """Show the current version of git-profiles CLI."""
         self._outputter.log(importlib.metadata.version('git-profiles'))
 
     def _handle_export(self, dest: Path) -> None:
+        """Export all profiles to a new configuration file.
+
+        Args:
+            dest (Path): Destination path.
+
+        Raises:
+            ExitError: If destination file already exists.
+        """
         try:
             self._storage.export_storage(dest)
         except FileExistsError as e:
@@ -263,6 +311,15 @@ class Cli:
             raise ExitError from e
 
     def _handle_import(self, src: Path, *, force: bool) -> None:
+        """Import profiles from a configuration file.
+
+        Args:
+            src (Path): Source path.
+            force (Path): Overwrite existing profiles on conflict if True.
+
+        Raises:
+            ExitError: If source file does not exist or merge conflicts occur.
+        """
         try:
             self._storage.import_storage(src, force=force)
         except FileNotFoundError as e:
