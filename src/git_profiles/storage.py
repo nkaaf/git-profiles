@@ -38,7 +38,7 @@ from pydantic import ValidationError as PydanticValidationError
 
 from git_profiles.const import PROGRAM_NAME
 
-__all__ = ['ConfigLoadError', 'Storage']
+__all__ = ['ConfigLoadError', 'DictMergeConflictError', 'Storage']
 
 ProfileType = dict[str, str]
 ConfigType = dict[str, ProfileType]
@@ -130,15 +130,21 @@ class Validator:
         if key_internal == cls.KEY_EMAIL and not cls.EMAIL_REGEX.fullmatch(value):
             raise ValidationError(key, value, 'Invalid email address')
 
-        if '\n' in value or '\r' in value:
-            raise ValidationError(
-                key, value, 'Values must not contain newline characters'
-            )
         for invalid_char in cls.VALUES_INVALID_CHAR:
             if invalid_char in value:
                 raise ValidationError(
                     key, value, 'Values must not only contain allowed characters'
                 )
+
+
+ConflictsType = dict[str, dict[str, tuple[str, str]]]
+
+
+class DictMergeConflictError(ValueError):
+    def __init__(self, conflicts: ConflictsType) -> None:
+        super().__init__()
+
+        self.conflicts = conflicts
 
 
 class Storage:
@@ -263,3 +269,47 @@ class Storage:
         """
         del self._config[profile_name]
         self._save()
+
+    def export_storage(self, dest: Path) -> None:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+
+        if dest.is_file():
+            raise FileExistsError
+
+        dest.write_text(json.dumps(self._config))
+
+    def import_storage(self, src: Path, *, force: bool) -> None:
+        if not src.is_file():
+            raise FileNotFoundError
+
+        imported_config = self._load(src)
+        self._config = (
+            imported_config
+            if force
+            else self._merge_config(self._config.copy(), imported_config.copy())
+        )
+
+    @staticmethod
+    def _merge_config(config1: ConfigType, config2: ConfigType) -> ConfigType:
+        conflicts: ConflictsType = {}
+
+        duplicated_profile_names = config1.keys() & config2.keys()
+        for duplicated_profile_name in duplicated_profile_names:
+            duplicated_keys = (
+                config1[duplicated_profile_name].keys()
+                & config2[duplicated_profile_name].keys()
+            )
+            for duplicated_key in duplicated_keys:
+                value1 = config1[duplicated_profile_name][duplicated_key]
+                value2 = config2[duplicated_profile_name][duplicated_key]
+                if value1 != value2:
+                    conflicts[duplicated_profile_name][duplicated_key] = (
+                        value1,
+                        value2,
+                    )
+
+        if len(conflicts.keys()) > 0:
+            raise DictMergeConflictError(conflicts.copy())
+
+        config1.update(config2)
+        return config1

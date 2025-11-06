@@ -23,9 +23,11 @@ to parse arguments and execute commands. It also manages exit codes:
 - Returns 1 if an `ExitError` occurs (e.g., invalid input, missing git).
 
 Usage:
-    python -m git_profiles
+    python -m git_profiles <command> [options]
     # or if installed as a CLI tool
     git-profiles <command> [options]
+    # or through git
+    git profiles <command> [options]
 """
 
 import sys
