@@ -32,8 +32,10 @@ Commands supported:
 import argparse
 import builtins
 import contextlib
+import importlib.metadata
 import shutil
 import subprocess
+from pathlib import Path
 
 from git_profiles.const import PROGRAM_NAME
 from git_profiles.output import Outputter
@@ -69,7 +71,7 @@ class Cli:
         self._outputter = Outputter(quiet=args.quiet)
 
         try:
-            self._storage = Storage()
+            self._storage = Storage(Path(args.storage))
         except ConfigLoadError as e:
             self._outputter.error(f'Error: {e}')
             raise ExitError from e
@@ -78,19 +80,36 @@ class Cli:
 
         self._run(args)
 
-    @staticmethod
-    def _run(args) -> None:  # noqa: ANN001
+    def _run(self, args: argparse.Namespace) -> None:  # noqa: C901
         """Execute the command selected by the user.
 
         Args:
             args: Parsed argparse arguments.
         """
-        args.func(args)
+        match args.func:
+            case self._handle_set:
+                self._handle_set(args.name, args.key, args.value)
+            case self._handle_unset:
+                self._handle_unset(args.name, args.key)
+            case self._handle_apply:
+                self._handle_apply(args.name)
+            case self._handle_list:
+                self._handle_list()
+            case self._handle_show:
+                self._handle_show(args.name)
+            case self._handle_remove:
+                self._handle_remove(args.name)
+            case self._handle_duplicate:
+                self._handle_duplicate(args.src, args.dest)
+            case self._handle_version:
+                self._handle_version()
+            case self._handle_import:
+                self._handle_import(Path(args.src), force=args.force)
+            case self._handle_export:
+                self._handle_export(Path(args.dest))
 
     def _evaluate_git_path(self) -> str:
         """Locate the `git` executable in the system PATH.
-
-        Uses `shutil.which` to find the full path to the `git` binary.
 
         Returns:
             str: Full path to the `git` executable.
@@ -104,7 +123,7 @@ class Cli:
             raise ExitError
         return path
 
-    def _handle_set(self, args) -> None:  # noqa: ANN001
+    def _handle_set(self, profile_name: str, key: str, value: str) -> None:
         """Set a key=value pair in a profile.
 
         Creates the profile if it does not exist.
@@ -112,8 +131,6 @@ class Cli:
         Args:
             args: Parsed argparse arguments with 'name', 'key', and 'value'.
         """
-        profile_name, key, value = args.name, args.key, args.value
-
         try:
             added_profile = self._storage.set(profile_name, key, value)
         except ValueError as e:
@@ -127,14 +144,12 @@ class Cli:
         else:
             self._outputter.log(f"[+] Updated '{profile_name}': set '{key}={value}'")
 
-    def _handle_unset(self, args) -> None:  # noqa: ANN001
+    def _handle_unset(self, profile_name: str, key: str) -> None:
         """Remove a key from a profile.
 
         Args:
             args: Parsed argparse arguments with 'name' and 'key'.
         """
-        profile_name, key = args.name, args.key
-
         try:
             self._storage.unset(profile_name, key)
         except KeyError as e:
@@ -143,14 +158,12 @@ class Cli:
 
         self._outputter.log(f"[x] Unset key '{key}' in profile '{profile_name}'")
 
-    def _handle_apply(self, args) -> None:  # noqa: ANN001
+    def _handle_apply(self, profile_name: str) -> None:
         """Apply a profile's key-values to the local Git repository.
 
         Args:
             args: Parsed argparse arguments with 'name'.
         """
-        profile_name = args.name
-
         try:
             profile = self._storage.get_profile(profile_name)
         except KeyError as e:
@@ -165,7 +178,7 @@ class Cli:
             f"[✔] Applied profile '{profile_name}' with {len(profile)} setting(s)"
         )
 
-    def _handle_list(self, _args) -> None:  # noqa: ANN001
+    def _handle_list(self) -> None:
         """List all available profiles."""
         profiles = self._storage.config.keys()
 
@@ -177,48 +190,42 @@ class Cli:
         for name in profiles:
             self._outputter.log(f' - {name}')
 
-    def _handle_show(self, args) -> None:  # noqa: ANN001
+    def _handle_show(self, profile_name: str) -> None:
         """Show all key=value pairs for a profile.
 
         Args:
             args: Parsed argparse arguments with 'name'.
         """
-        name = args.name
-
         try:
-            profile = self._storage.get_profile(name)
+            profile = self._storage.get_profile(profile_name)
         except KeyError as e:
-            self._outputter.error(f"[!] Profile '{name}' does not exist")
+            self._outputter.error(f"[!] Profile '{profile_name}' does not exist")
             raise ExitError from e
 
-        self._outputter.log(f"[>] Profile '{name}':")
+        self._outputter.log(f"[>] Profile '{profile_name}':")
         for key, value in profile.items():
             self._outputter.log(f'  {key} = {value}')
 
-    def _handle_remove(self, args) -> None:  # noqa: ANN001
+    def _handle_remove(self, profile_name: str) -> None:
         """Delete a profile entirely.
 
         Args:
             args: Parsed argparse arguments with 'name'.
         """
-        name = args.name
-
         try:
-            self._storage.remove(name)
+            self._storage.remove(profile_name)
         except KeyError as e:
-            self._outputter.error(f"[!] Profile '{name}' does not exist")
+            self._outputter.error(f"[!] Profile '{profile_name}' does not exist")
             raise ExitError from e
 
-        self._outputter.log(f"[x] Removed profile '{name}'")
+        self._outputter.log(f"[x] Removed profile '{profile_name}'")
 
-    def _handle_duplicate(self, args) -> None:  # noqa: ANN001
+    def _handle_duplicate(self, src: str, dest: str) -> None:
         """Duplicate a profile under a new name.
 
         Args:
             args: Parsed argparse arguments with 'src' and 'dest'.
         """
-        src, dest = args.src, args.dest
-
         try:
             src_profile = self._storage.get_profile(src)
         except KeyError as e:
@@ -245,6 +252,8 @@ class Cli:
             )
             raise ExitError from e
 
+    def _handle_version(self) -> None:
+        self._outputter.log(importlib.metadata.version('git-profiles'))
     def _build_parser(self) -> argparse.ArgumentParser:
         """Build the argument parser with all subcommands and options.
 
@@ -259,6 +268,11 @@ class Cli:
             '--quiet',
             action='store_true',
             help='Suppress normal output',
+        )
+        parser.add_argument(
+            '--storage',
+            default=Storage.STORAGE_FILE_PATH,
+            help='Path to git-profiles storage file',
         )
         subparsers = parser.add_subparsers(dest='command', required=True)
 
@@ -297,4 +311,6 @@ class Cli:
         p_duplicate.add_argument('dest', help='Destination profile')
         p_duplicate.set_defaults(func=self._handle_duplicate)
 
+        p_version = subparsers.add_parser('version', help='Show version')
+        p_version.set_defaults(func=self._handle_version)
         return parser

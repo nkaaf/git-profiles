@@ -22,7 +22,7 @@ key-value pairs for git configuration.
 
 Features:
 - Atomic writes to prevent corruption.
-- Key/value validation and whitelisting.
+- Key/value validation (Email according to WHATWG spec) and whitelisting.
 - Schema validation using Pydantic.
 """
 
@@ -40,12 +40,15 @@ from git_profiles.const import PROGRAM_NAME
 
 __all__ = ['ConfigLoadError', 'Storage']
 
+ProfileType = dict[str, str]
+ConfigType = dict[str, ProfileType]
 
-class Profile(RootModel[dict[str, str]]):
+
+class ProfileModel(RootModel[ProfileType]):
     """Represents a single profile with key-value settings."""
 
 
-class ConfigModel(RootModel[dict[str, Profile]]):
+class ConfigModel(RootModel[dict[str, ProfileModel]]):
     """Root model for the entire configuration (multiple profiles)."""
 
 
@@ -85,13 +88,17 @@ class Validator:
     invalid data.
     """
 
-    SAFE_KEYS: ClassVar = {
+    KEY_EMAIL = 'user.email'
+
+    SAFE_KEYS: ClassVar[list[str]] = [
         'user.name',
-        'user.email',
+        KEY_EMAIL,
         'user.signingkey',
-        'commit.gpgSign',
-        'tag.gpgSign',
-    }
+        'commit.gpgsign',
+        'tag.gpgsign',
+    ]
+
+    VALUES_INVALID_CHAR: ClassVar[list[str]] = ['\r', '\n']
 
     # https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address
     EMAIL_REGEX = re.compile(
@@ -115,16 +122,23 @@ class Validator:
             ValidationError: If the key is not allowed, the value is invalid,
                              or it contains forbidden characters.
         """
-        if key not in cls.SAFE_KEYS:
+        key_internal = key.lower()
+
+        if key_internal not in cls.SAFE_KEYS:
             raise ValidationError(key, value, 'Key is not allowed for security reasons')
 
-        if key == 'user.email' and not cls.EMAIL_REGEX.fullmatch(value):
+        if key_internal == cls.KEY_EMAIL and not cls.EMAIL_REGEX.fullmatch(value):
             raise ValidationError(key, value, 'Invalid email address')
 
         if '\n' in value or '\r' in value:
             raise ValidationError(
                 key, value, 'Values must not contain newline characters'
             )
+        for invalid_char in cls.VALUES_INVALID_CHAR:
+            if invalid_char in value:
+                raise ValidationError(
+                    key, value, 'Values must not only contain allowed characters'
+                )
 
 
 class Storage:
@@ -133,57 +147,56 @@ class Storage:
     Handles loading, saving, and validating profiles as JSON files.
     """
 
-    DIRNAME = PROGRAM_NAME.replace('-', '_')
-    FILENAME = 'config.json'
-    STORAGE_FILE_PATH = PlatformDirs(PROGRAM_NAME).user_data_path / FILENAME
+    STORAGE_FILE_PATH = PlatformDirs(PROGRAM_NAME).user_data_path / 'config.json'
 
-    def __init__(self) -> None:
+    def __init__(self, config_file: Path) -> None:
         """Initialize storage and load configuration."""
-        self.STORAGE_FILE_PATH.parent.mkdir(parents=True, exist_ok=True)
-        self._config: dict = self._load() or {}
+        self.config_file = config_file
+        self.config_file.parent.mkdir(parents=True, exist_ok=True)
+
+        self._config = self._load(self.config_file)
 
     @property
-    def config(self) -> dict:
+    def config(self) -> ConfigType:
         """Return a copy of the current configuration."""
         return self._config.copy()
 
-    @classmethod
-    def _load(cls) -> dict[str, dict[str, str]] | None:
+    @staticmethod
+    def _load(file: Path) -> ConfigType:
         """Load and validate the configuration from disk.
 
         Returns:
-            dict[str, dict[str, str]]: Loaded config data.
+            ConfigType: Loaded config data.
 
         Raises:
             ConfigLoadError: If the file is invalid JSON, schema fails,
                              or contains unsafe keys/values.
         """
-        if not cls.STORAGE_FILE_PATH.is_file():
-            return None
+        if not file.is_file():
+            return {}
 
         try:
-            raw_data = json.loads(cls.STORAGE_FILE_PATH.read_text())
-            validated = ConfigModel.model_validate(raw_data)
+            validated = ConfigModel.model_validate_json(file.read_text(), strict=True)
 
             for profile_data in validated.model_dump().values():
                 for key, value in profile_data.items():
                     Validator.validate_key_value(key, value)
 
-        except (json.JSONDecodeError, ValidationError, PydanticValidationError) as e:
-            raise ConfigLoadError(cls.STORAGE_FILE_PATH, str(e)) from e
+        except (ValidationError, PydanticValidationError) as e:
+            raise ConfigLoadError(file, str(e)) from e
 
-        return validated.model_dump()
+        return {name: profile.root for name, profile in validated.root.items()}
 
     def _save(self) -> None:
         """Atomically save the configuration to disk."""
-        data = json.dumps(self.config)
+        data = json.dumps(self._config)
 
-        tmp_dir = self.STORAGE_FILE_PATH.parent
+        tmp_dir = self.config_file.parent
         with tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False) as temp_file:
             temp_file.write(data)
             tmp_path = Path(temp_file.name)
 
-        tmp_path.replace(self.STORAGE_FILE_PATH)
+        tmp_path.replace(self.config_file)
 
     def set(self, profile_name: str, key: str, value: str) -> bool:
         """Set a key=value pair in a profile.
@@ -212,7 +225,6 @@ class Storage:
 
         return added_profile
 
-    # raises KeyError if profile does not exist
     def unset(self, profile_name: str, key: str) -> None:
         """Remove a key from a profile.
 
@@ -226,15 +238,14 @@ class Storage:
         self._config[profile_name].pop(key, None)
         self._save()
 
-    # raises KeyError if profile does not exists
-    def get_profile(self, profile_name: str) -> dict[str, str]:
+    def get_profile(self, profile_name: str) -> ProfileType:
         """Get all key-value pairs of a profile.
 
         Args:
             profile_name (str): Profile name.
 
         Returns:
-            dict[str, str]: The profile's key-value data.
+            ProfileType: The profile's key-value data.
 
         Raises:
             KeyError: If the profile does not exist.
