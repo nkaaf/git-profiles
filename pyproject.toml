@@ -45,6 +45,7 @@ git-profiles = "git_profiles.__main__:main"
 
 [dependency-groups]
 dev = [
+    "faker>=37.12.0",
     "mypy>=1.18.2",
     "poethepoet>=0.37.0",
     "pre-commit>=2.21.0",
@@ -116,6 +117,9 @@ strict = true
 
 [tool.poe.tasks]
 mypy = "mypy"
+ruff_check = "ruff check"
+ruff_format = "ruff format"
+ruff = ["ruff_check", "ruff_format"]
 pre-commit = "pre-commit run --all-files"
-lint = ["mypy", "pre-commit"]
+lint = ["mypy", "ruff"]
 test = "tox"

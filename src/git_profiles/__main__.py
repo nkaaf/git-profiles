@@ -30,7 +30,7 @@ Usage:
 
 import sys
 
-from .cli import Cli, ExitError
+from git_profiles.cli import Cli, ExitError
 
 
 def main() -> int:
