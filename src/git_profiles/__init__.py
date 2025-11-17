@@ -28,8 +28,12 @@ Modules:
 - const: Constants used across the package.
 
 Usage:
-    # Typically used via the CLI entry point
+    # Typically used via git
+    git profiles <command> [options]
+    # or the CLI entry point
     git-profiles <command> [options]
+    # or via python module
+    python -m git_profiles <command> [options]
 """
 
 __all__ = []

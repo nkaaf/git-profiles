@@ -17,14 +17,12 @@
 import random
 
 import pytest
-from faker.proxy import Faker
 
 from git_profiles.storage import ValidationError, Validator
+from test_git_profiles.common_helpers_test import FAKER, assert_str_in_str
 
 KEYS = Validator.SAFE_KEYS
 KEYS_WITHOUT_EMAIL = [key for key in KEYS.copy() if 'email' not in key]
-
-FAKER = Faker()
 
 
 @pytest.mark.parametrize('key', KEYS_WITHOUT_EMAIL)
@@ -36,37 +34,50 @@ def test_validate_keys_email() -> None:
     Validator.validate_key_value(Validator.KEY_EMAIL, FAKER.email(safe=True))
 
 
-@pytest.mark.parametrize('key', [FAKER.name() for _i in range(100)])
-def test_validate_keys_bad(key: str) -> None:
-    with pytest.raises(ValidationError):
-        Validator.validate_key_value(key, '')
+def test_validate_keys_bad(subtests: pytest.Subtests) -> None:
+    fake_keys = [FAKER.name() for _i in range(100)]
+
+    value = 'value'
+
+    for key in fake_keys:
+        with subtests.test(key=key):
+            with pytest.raises(ValidationError) as exc:
+                Validator.validate_key_value(key, value)
+
+            assert_str_in_str(
+                str(exc.value),
+                words_exact=[key, value],
+                words_norm=['key', 'value'],
+            )
 
 
-@pytest.mark.parametrize(
-    'key',
-    [
-        ''.join(c.upper() if random.random() < 0.3 else c for c in key)  # noqa: PLR2004, S311
+def test_validate_keys_case_insensitivity(subtests: pytest.Subtests) -> None:
+    fake_keys = [
+        ''.join(c.upper() if random.random() < 0.3 else c for c in key)  # noqa: S311
         for key in KEYS_WITHOUT_EMAIL
-    ],
-)
-def test_validate_keys_case_insensitivity(key: str) -> None:
-    Validator.validate_key_value(key, '')
+    ]
+
+    for key in fake_keys:
+        with subtests.test(key=key):
+            Validator.validate_key_value(key, '')
 
 
-@pytest.mark.parametrize(
-    'key',
-    [''.join(c.upper() if random.random() < 0.3 else c for c in Validator.KEY_EMAIL)],  # noqa: PLR2004, S311
-)
-def test_validate_keys_case_insensitivity_email(key: str) -> None:
-    Validator.validate_key_value(
-        key,
-        FAKER.email(safe=True),
-    )
+def test_validate_keys_case_insensitivity_email(subtests: pytest.Subtests) -> None:
+    fake_keys = [
+        ''.join(c.upper() if random.random() < 0.3 else c for c in Validator.KEY_EMAIL)  # noqa: S311
+    ]
+
+    for key in fake_keys:
+        with subtests.test(key=key):
+            Validator.validate_key_value(key, FAKER.email(safe=True))
 
 
-@pytest.mark.parametrize('email', [FAKER.email(safe=False) for _i in range(100)])
-def test_email_regex_good_email(email: str) -> None:
-    Validator.validate_key_value(Validator.KEY_EMAIL, email)
+def test_email_regex_good_email(subtests: pytest.Subtests) -> None:
+    fake_emails = [FAKER.email(safe=False) for _i in range(100)]
+
+    for email in fake_emails:
+        with subtests.test(email=email):
+            Validator.validate_key_value(Validator.KEY_EMAIL, email)
 
 
 @pytest.mark.parametrize(
@@ -93,17 +104,31 @@ def test_email_regex_good_email(email: str) -> None:
     ],
 )
 def test_email_regex_bad_email(email: str) -> None:
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValidationError) as exc:
         Validator.validate_key_value(Validator.KEY_EMAIL, email)
 
+    assert_str_in_str(
+        str(exc.value),
+        words_exact=[Validator.KEY_EMAIL, email],
+        words_norm=['email'],
+    )
 
-@pytest.mark.parametrize(
-    'value',
-    [
+
+def test_validate_values_invalid_char(subtests: pytest.Subtests) -> None:
+    fake_values = [
         ('a' * (int(random.random() * 10))) + c + ('b' * (int(random.random() * 10)))  # noqa: S311
         for c in Validator.VALUES_INVALID_CHAR
-    ],
-)
-def test_validate_values_invalid_char(value: str) -> None:
-    with pytest.raises(ValidationError):
-        Validator.validate_key_value(Validator.SAFE_KEYS[0], value)
+    ]
+
+    key = Validator.SAFE_KEYS[0]
+
+    for value in fake_values:
+        with subtests.test(value=value):
+            with pytest.raises(ValidationError) as exc:
+                Validator.validate_key_value(key, value)
+
+            assert_str_in_str(
+                str(exc.value),
+                words_exact=[key, value],
+                words_norm=['char'],
+            )

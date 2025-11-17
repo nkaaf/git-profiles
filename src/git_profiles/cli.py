@@ -46,7 +46,11 @@ from pathlib import Path
 
 from git_profiles.const import PROGRAM_NAME
 from git_profiles.output import Outputter
-from git_profiles.storage import ConfigLoadError, DictMergeConflictError, Storage
+from git_profiles.storage import (
+    DictMergeConflictError,
+    Storage,
+    StorageError,
+)
 
 __all__ = ['Cli', 'ExitError']
 
@@ -73,23 +77,25 @@ class Cli:
             argv (list[str]): The list of command-line arguments.
 
         Raises:
-            ExitError: If initialization fails, e.g., storage cannot be loaded
-                       or git executable is not available.
+            ExitError: If any exception occurs during runtime.
         """
         parser = self._build_parser()
         args = parser.parse_args(argv)
 
         self._outputter = Outputter(quiet=args.quiet)
 
-        try:
-            self._storage = Storage(Path(args.storage))
-        except ConfigLoadError as e:
-            self._outputter.error(f'Error: {e}')
-            raise ExitError from e
-
         self._git_path = self._evaluate_git_path()
 
-        self._run(args)
+        self._storage_path = Path(args.storage)
+
+        try:
+            self._run(args)
+        except StorageError as e:
+            self._outputter.error(str(e))
+            raise ExitError from e
+
+    def _build_storage(self) -> Storage:
+        return Storage(self._storage_path)
 
     def _run(self, args: argparse.Namespace) -> None:  # noqa: C901
         """Dispatch the CLI command based on parsed arguments.
@@ -98,6 +104,10 @@ class Cli:
             args (argparse.Namespace):  Parsed argparse arguments with a `.func`
                                         attribute pointing to the correct command
                                         handler.
+
+        Raises:
+            StorageError: If another instance is running.
+            ExitError: If program should exit due to error.
         """
         match args.func:
             case self._handle_set:
@@ -128,11 +138,11 @@ class Cli:
             str: Full path to the `git` executable.
 
         Raises:
-            ExitError: If `git` is not found.
+            ExitError: If program should exit due to error.
         """
         path = shutil.which('git')
         if path is None:
-            self._outputter.log("[!] 'git' is not available.")
+            self._outputter.error("'git' is not available.")
             raise ExitError
         return path
 
@@ -147,13 +157,11 @@ class Cli:
             value (str): Value to set for the key.
 
         Raises:
-            ExitError: If key=value pair cannot be set.
+            StorageError: If key=value pair cannot be set or another instance is
+                          running.
         """
-        try:
-            added_profile = self._storage.set(profile_name, key, value)
-        except ValueError as e:
-            self._outputter.error(f'[X] Error: {e}')
-            raise ExitError from e
+        storage = self._build_storage()
+        added_profile = storage.set(profile_name, key, value)
 
         if added_profile:
             self._outputter.log(
@@ -170,13 +178,10 @@ class Cli:
             key (str): Git configuration key to remove.
 
         Raises:
-            ExitError: If the profile does not exist.
+            StorageError: If the profile does not exist or another instance is running.
         """
-        try:
-            self._storage.unset(profile_name, key)
-        except KeyError as e:
-            self._outputter.error(f"[!] Profile '{profile_name}' does not exist")
-            raise ExitError from e
+        storage = self._build_storage()
+        storage.unset(profile_name, key)
 
         self._outputter.log(f"[x] Unset key '{key}' in profile '{profile_name}'")
 
@@ -187,13 +192,10 @@ class Cli:
             profile_name (str): Name of the profile to apply.
 
         Raises:
-            ExitError: If the profile does not exist.
+            StorageError: If the profile does not exist or another instance is running.
         """
-        try:
-            profile = self._storage.get_profile(profile_name)
-        except KeyError as e:
-            self._outputter.error(f"[!] Profile '{profile_name}' does not exist")
-            raise ExitError from e
+        storage = self._build_storage()
+        profile = storage.get_profile(profile_name)
 
         for key, value in profile.items():
             subprocess.check_call(  # noqa: S603
@@ -207,17 +209,17 @@ class Cli:
         """List all available profiles.
 
         Raises:
-            ExitError: If no profiles exist.
+            StorageError: If another instance is running.
         """
-        profiles = self._storage.config.keys()
+        storage = self._build_storage()
+        profiles = storage.config.keys()
 
-        if not profiles:
-            self._outputter.error('[i] No profiles found')
-            raise ExitError
-
-        self._outputter.log('[>] Available profiles:')
-        for name in profiles:
-            self._outputter.log(f' - {name}')
+        if len(profiles) == 0:
+            self._outputter.log('[i] No profiles found')
+        else:
+            self._outputter.log('[>] Available profiles:')
+            for name in profiles:
+                self._outputter.log(f'\t- {name}')
 
     def _handle_show(self, profile_name: str) -> None:
         """Display all key=value pairs of a profile.
@@ -226,17 +228,14 @@ class Cli:
             profile_name (str): Name of the profile to show.
 
         Raises:
-            ExitError: If the profile does not exist.
+            StorageError: If the profile does not exist or another instance is running.
         """
-        try:
-            profile = self._storage.get_profile(profile_name)
-        except KeyError as e:
-            self._outputter.error(f"[!] Profile '{profile_name}' does not exist")
-            raise ExitError from e
+        storage = self._build_storage()
+        profile = storage.get_profile(profile_name)
 
         self._outputter.log(f"[>] Profile '{profile_name}':")
         for key, value in profile.items():
-            self._outputter.log(f'  {key} = {value}')
+            self._outputter.log(f'\t{key} = {value}')
 
     def _handle_remove(self, profile_name: str) -> None:
         """Delete a profile.
@@ -245,15 +244,12 @@ class Cli:
             profile_name (str): Name of the profile to remove.
 
         Raises:
-            ExitError: If the profile does not exist.
+            StorageError: If the profile does not exist or another instance is running.
         """
-        try:
-            self._storage.remove(profile_name)
-        except KeyError as e:
-            self._outputter.error(f"[!] Profile '{profile_name}' does not exist")
-            raise ExitError from e
+        storage = self._build_storage()
+        storage.remove(profile_name)
 
-        self._outputter.log(f"[x] Removed profile '{profile_name}'")
+        self._outputter.log(f"[✔] Removed profile '{profile_name}'")
 
     def _handle_duplicate(self, src: str, dest: str) -> None:
         """Duplicate a profile under a new name.
@@ -263,33 +259,34 @@ class Cli:
             dest (str): Destination profile name.
 
         Raises:
-            ExitError: If source does not exist, destination exists, or merge fails.
+            StorageError: If source does not exist, merge fails, or another instance is
+                          running.
+            ExitError: If program should exit due to error.
         """
-        try:
-            src_profile = self._storage.get_profile(src)
-        except KeyError as e:
-            self._outputter.error(f"[X] Source profile '{src}' not found")
-            raise ExitError from e
+        with self._build_storage() as storage:
+            src_profile = storage.get_profile(src)
 
-        try:
-            self._storage.get_profile(dest)
-        except KeyError:
-            pass
-        else:
-            self._outputter.error(f"[X] Destination profile '{dest}' already exists")
-            raise ExitError
+            try:
+                storage.get_profile(dest)
+            except StorageError:
+                pass
+            else:
+                self._outputter.error(f"Destination profile '{dest}' already exists")
+                raise ExitError
 
-        try:
-            for key, value in src_profile.items():
-                self._storage.set(dest, key, value)
-        except ValueError as e:
-            with contextlib.suppress(builtins.BaseException):
-                self._storage.remove(dest)
+            try:
+                for key, value in src_profile.items():
+                    storage.set(dest, key, value)
+            except StorageError as e:
+                with contextlib.suppress(builtins.BaseException):
+                    storage.remove(dest)
 
-            self._outputter.error(
-                '[X] Failed to duplicate profile for unknown reason',
-            )
-            raise ExitError from e
+                self._outputter.error(
+                    'Failed to duplicate profile for unknown reason',
+                )
+                raise ExitError from e
+
+        self._outputter.log(f"[✔] Duplicate '{src}' to '{dest}'")
 
     def _handle_version(self) -> None:
         """Show the current version of git-profiles CLI."""
@@ -302,13 +299,18 @@ class Cli:
             dest (Path): Destination path.
 
         Raises:
-            ExitError: If destination file already exists.
+            StorageError: If another instance is running.
+            ExitError: If program should exit due to error.
         """
+        storage = self._build_storage()
+
         try:
-            self._storage.export_storage(dest)
+            storage.export_storage(dest)
         except FileExistsError as e:
-            self._outputter.error(f"[!] Destination file '{dest}' already exists")
+            self._outputter.error(f"Destination file '{dest}' already exists")
             raise ExitError from e
+
+        self._outputter.log(f"[✔] Export to '{dest}' successful")
 
     def _handle_import(self, src: Path, *, force: bool) -> None:
         """Import profiles from a configuration file.
@@ -318,26 +320,30 @@ class Cli:
             force (Path): Overwrite existing profiles on conflict if True.
 
         Raises:
-            ExitError: If source file does not exist or merge conflicts occur.
+            StorageError: If another instance is running.
+            ExitError: If program should exit due to error.
         """
+        storage = self._build_storage()
+
         try:
-            self._storage.import_storage(src, force=force)
+            storage.import_storage(src, force=force)
         except FileNotFoundError as e:
-            self._outputter.error(f"[!] Source file '{src}' not existing")
+            self._outputter.error(f"Source file '{src}' not existing")
             raise ExitError from e
         except DictMergeConflictError as e:
-            self._outputter.error(
-                '[!] Found the following merge conflicts during import:'
-            )
+            conflict_lines = ['Found the following merge conflicts during import:']
 
             for profile_name, entries in e.conflicts.items():
-                self._outputter.error(f'\tProfile: {profile_name}')
-
+                conflict_lines.append(f'\tProfile: {profile_name}')
                 for key, (old_value, new_value) in entries.items():
-                    self._outputter.error(
-                        f'\t\t{key}: existing={old_value}, incoming={new_value}'
+                    conflict_lines.append(
+                        f'\t\t{key}: existing={old_value!r}, incoming={new_value!r}'
                     )
+
+            self._outputter.error('\n'.join(conflict_lines))
             raise ExitError from e
+
+        self._outputter.log(f"[✔] Import from '{src}' successful")
 
     def _build_parser(self) -> argparse.ArgumentParser:
         """Build the argument parser with all subcommands and options.
@@ -356,7 +362,7 @@ class Cli:
         )
         parser.add_argument(
             '--storage',
-            default=Storage.STORAGE_FILE_PATH,
+            default=Storage.STORAGE_FILE_PATH_DEFAULT,
             help='Path to git-profiles storage file',
         )
         subparsers = parser.add_subparsers(dest='command', required=True)

@@ -1,6 +1,6 @@
 [project]
 name = "git-profiles"
-version = "0.1.0"
+version = "0.2.0"
 description = "CLI tool to manage multiple Git configuration profiles"
 authors = [
     { name = "Niklas Kaaf", email = "nkaaf@protonmail.com" }
@@ -31,8 +31,10 @@ license-files = [
 ]
 
 dependencies = [
+    "filelock>=3.20.0",
     "platformdirs>=4.5.0",
     "pydantic>=2.12.2",
+    "typing-extensions>=4.15.0",
 ]
 
 [project.urls]
@@ -49,7 +51,7 @@ dev = [
     "mypy>=1.18.2",
     "poethepoet>=0.37.0",
     "pre-commit>=2.21.0",
-    "pytest>=8.4.2",
+    "pytest>=9.0.0",
     "pytest-cov>=7.0.0",
     "ruff>=0.14.1",
     "tox>=4.31.0",
@@ -82,16 +84,20 @@ inline-quotes = "single"
 convention = "google"
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["D", "INP001", "S101"]
+"tests/*" = ["D", "INP001", "S101", "PLR2004"]
+
+[tool.pytest]
+minversion = "9.0"
+testpaths = ["tests"]
+strict = true
 
 [tool.tox]
 requires = ["tox-uv"]
 envlist = ["py310", "py311", "py312", "py313", "py314"]
 
 [tool.tox.env_run_base]
-deps = ["pytest", "pytest-cov", "faker"]
 package = "editable"
-commands = [["pytest", "tests", "--cov", "--cov-append", "--cov-report=term-missing", "--cov-report=xml", "--junitxml=junit.xml", "-o junit_family=legacy"]]
+commands = [["pytest", "--cov", "--cov-append", "--cov-report=term-missing", "--cov-report=xml", "--junitxml=junit.xml"]]
 
 [tool.coverage.run]
 source = ["src"]
@@ -119,7 +125,8 @@ strict = true
 mypy = "mypy"
 ruff_check = "ruff check"
 ruff_format = "ruff format"
-ruff = ["ruff_check", "ruff_format"]
+tox = "tox"
 pre-commit = "pre-commit run --all-files"
+ruff = ["ruff_check", "ruff_format"]
 lint = ["mypy", "ruff"]
-test = "tox"
+test = ["tox"]
