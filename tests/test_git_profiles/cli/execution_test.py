@@ -41,7 +41,7 @@ def test_execution_error() -> None:
 
 def test_execution_argparse_error() -> None:
     with pytest.raises(SystemExit) as exec_info:
-        _ret_val, _stdout, _stderr, _config = execute('--version')
+        execute('--version')
     assert exec_info.value.code == VALUE_ARGPARSE_ERROR
 
 
