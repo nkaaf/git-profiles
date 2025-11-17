@@ -65,4 +65,4 @@ class Outputter:
         Args:
             msg (str): The error message to print.
         """
-        self._log(msg, file=sys.stderr)
+        self._log(f'[X] Error: {msg}', file=sys.stderr)

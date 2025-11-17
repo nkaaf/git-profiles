@@ -62,4 +62,4 @@ def test_error(quiet: bool) -> None:  # noqa: FBT001
 
         buffer.flush()
         buffer.seek(0)
-        assert buffer.read().strip() == msg
+        assert msg in buffer.read().strip()
