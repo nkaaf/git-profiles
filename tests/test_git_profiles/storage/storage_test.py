@@ -91,7 +91,7 @@ def test_file_lock_variable() -> None:
         filelock.FileLock.acquire = mock_acquire
 
         # The operation that triggers a locking
-        _config = storage.config
+        _unused_config = storage.config
 
         assert Counter.counter() != 0
 
@@ -111,7 +111,7 @@ def test_file_lock_timeout() -> None:
         storage_2 = Storage(Path(temp_file.name))
 
         with pytest.raises(StorageFileLockError) as exc:
-            _config = storage_2.config
+            _unused_config = storage_2.config
 
         assert_str_in_str(str(exc.value), words_norm=['instance', 'current', 'run'])
 

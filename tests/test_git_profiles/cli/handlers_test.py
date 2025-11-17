@@ -302,18 +302,14 @@ def test_handle_apply(git_init: Path) -> None:
     # Change to ContextManager usage of chdir, if PY311 is Min Version
     os.chdir(git_init)
 
-    config_user_name = subprocess.check_output(
+    config_user_name = subprocess.check_output(  # noqa: S603
         [GIT_EXECUTABLE, 'config', 'user.name']
-    ).decode(  # noqa: S603
-        ENCODING
-    )[:-1]
+    ).decode(ENCODING)[:-1]
     assert config_user_name == user2_name
 
-    config_user_email = subprocess.check_output(
+    config_user_email = subprocess.check_output(  # noqa: S603
         [GIT_EXECUTABLE, 'config', 'user.email']
-    ).decode(  # noqa: S603
-        ENCODING
-    )[:-1]
+    ).decode(ENCODING)[:-1]
     assert config_user_email == user2_email
 
     ret_val, stdout, stderr, _config = execute(
