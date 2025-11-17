@@ -324,12 +324,10 @@ def test_handle_apply(git_init: Path) -> None:
         words_exact_excl=[profile2_name, user1_name, user2_name, user2_email],
     )
 
-    assert (
-        subprocess.check_output([GIT_EXECUTABLE, 'config', 'user.name']).decode(  # noqa: S603
-            ENCODING
-        )[:-1]
-        == user1_name
-    )
+    config_user_name = subprocess.check_output(  # noqa: S603
+        [GIT_EXECUTABLE, 'config', 'user.name']
+    ).decode(ENCODING)[:-1]
+    assert config_user_name == user1_name
 
     os.chdir(dir_saved)
 
