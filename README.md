@@ -317,5 +317,7 @@ Apache License 2.0 – see [LICENSE](LICENSE) for details.
 
 This project depends on the following open source libraries:
 
+- [filelock](https://github.com/tox-dev/filelock) - The Unlicense
 - [platformdirs](https://github.com/tox-dev/platformdirs) — MIT License
 - [pydantic](https://github.com/pydantic/pydantic) — MIT License
+- [typing-extensions](https://github.com/python/typing_extensions) - PSF-2.0
