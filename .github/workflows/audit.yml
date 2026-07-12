@@ -55,12 +55,6 @@ jobs:
         run: |
           uv sync
 
-      - name: Cache tox environments
-        uses: actions/cache@v5.0.1
-        with:
-          path: .tox
-          key: ${{ runner.os }}-tox-${{ hashFiles('pyproject.toml', 'tox.ini') }}
-
       - name: Run tests
         run: |
           uv run poe test
