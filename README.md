@@ -211,8 +211,8 @@ git profiles -q apply work
 Get your development environment ready in a few steps:
 
 ```bash
-# 1. Install all development dependencies (pytest, tox, ruff, pre-commit, etc.)
-uv sync
+# 1. Install all development dependencies
+uv sync --frozen
 
 # 2. Install pre-commit git hooks
 pre-commit install
@@ -222,7 +222,7 @@ pre-commit install
 
 > ⚠️ **Important:** Always run commands via `uv run poe <script>` (e.g., `uv run poe lint`,
 `uv run poe test`).
-> This ensures the correct uv-managed environment is used. Running `poe` or `tox` directly may fail
+> This ensures the correct uv-managed environment is used. Running `poe` directly may fail
 > if the environment isn’t active, especially on CI runners.
 
 ---
@@ -235,6 +235,7 @@ uv run poe lint
 ```
 
 > ℹ️ This internally runs `pre-commit` using the uv-managed environment.
+
 > 💡 Commits automatically trigger pre-commit hooks after `pre-commit install`.
 > If any hook fails (e.g., lint errors), the commit is blocked until fixed.
 
@@ -243,14 +244,12 @@ uv run poe lint
 ### Testing
 
 ```bash
-# Run all test environments defined in pyproject.toml
+# Run all tests defined in pyproject.toml
 uv run poe test
 ```
 
-> ℹ️ This internally runs `tox` using the uv-managed environment.
-> ⚠️ **Note:** Tox requires the Python interpreters listed in `[tool.tox].envlist`.
-> With the `tox-uv` plugin, missing interpreters are installed automatically.
-> You can also install specific Python versions manually with `uv python install <version>`.
+> ℹ️ This internally runs `pytest` using the uv-managed environment.
+> You can also run specific python tests with `uv run poe test-<version>`.
 
 ---
 
@@ -259,65 +258,9 @@ uv run poe test
 You can build the `git-profiles` package locally for testing or distribution:
 
 ```bash
-# Ensure your development environment is synced
-uv sync
+# Ensure your environment is synced
+uv sync --frozen --group build --no-dev
 
 # Build both wheel and source distribution
 uv build
 ```
-
-> ⚡ Using `uv sync` ensures that all development dependencies are available during the build
-> process.
-
----
-
-### References / Helpful Links
-
-For more information on the tools used in this project, you can visit their official documentation:
-
-* **[uv](https://docs.astral.sh/uv/)** – Dependency manager for Python projects, used here to
-  manage dev dependencies and Python interpreters.
-* **[tox](https://tox.wiki/)** – Automate testing across multiple Python versions.
-* **[pre-commit](https://pre-commit.com/)** – Manage and run pre-commit hooks to ensure code
-  quality.
-* **[Poe the Poet](https://poethepoet.natn.io/)** – Task runner that simplifies running
-  scripts (like `lint` and `test`) defined in `pyproject.toml`.
-* **[pipx](https://pipx.pypa.io/stable/)** – Install and run Python CLI tools in isolated
-  environments while making them available globally.
-* **[Python Packaging Guide](https://packaging.python.org/en/latest/tutorials/packaging-projects/)**
-  – Official guide for building, packaging, and distributing Python projects, including creating
-  source distributions and wheels.
-* **[Homebrew](https://brew.sh/)** – Popular package manager for macOS and Linux, used to install
-  CLI tools and dependencies system-wide.
-
-> 💡 These links provide detailed documentation, installation guides, and examples for each tool.
-> They’re especially useful if you’re new to Python project tooling.
-
----
-
-## CI / GitHub Actions
-
-The repository’s CI pipelines automatically run:
-
-* Tests across all Python versions defined in `[tool.tox].envlist`
-* Pre-commit hooks for linting and code quality
-
-> ✅ This ensures that every commit and pull request is tested and checked consistently with your
-> local development setup.
-
----
-
-## License
-
-Apache License 2.0 – see [LICENSE](LICENSE) for details.
-
----
-
-## Acknowledgements
-
-This project depends on the following open source libraries:
-
-- [filelock](https://github.com/tox-dev/filelock) - The Unlicense
-- [platformdirs](https://github.com/tox-dev/platformdirs) — MIT License
-- [pydantic](https://github.com/pydantic/pydantic) — MIT License
-- [typing-extensions](https://github.com/python/typing_extensions) - PSF-2.0
