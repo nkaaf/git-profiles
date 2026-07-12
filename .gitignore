@@ -9,5 +9,4 @@ __pycache__/
 
 # Pytest
 .coverage
-coverage.xml
-junit.xml
+coverage-*.xml

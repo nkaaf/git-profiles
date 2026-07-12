@@ -24,7 +24,7 @@ jobs:
 
       - name: Install project dependencies
         run: |
-          uv sync
+          uv sync --frozen
 
       - name: Run linting
         run: |
@@ -35,6 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      id-token: write
 
     steps:
       - name: Checkout
@@ -53,22 +54,19 @@ jobs:
 
       - name: Install project dependencies
         run: |
-          uv sync
+          uv sync --frozen
 
       - name: Run tests
         run: |
-          uv run poe test
+          uv run poe test-target
 
-      - name: Upload coverage reports to Codecov
+      - name: Upload reports to Codecov
         uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-
-      - name: Upload test results to Codecov
-        if: ${{ !cancelled() }}
-        uses: codecov/test-results-action@47f89e9acb64b76debcd5ea40642d25a4adced9f # v1.1.1
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          disable_search: true
+          files: "./coverage-3.10.xml"
+          use_oidc: true
 
   audit:
     name: "Audit"

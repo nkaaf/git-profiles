@@ -124,23 +124,24 @@ pre-commit = "pre-commit run --all-files"
 ruff = ["ruff_check", "ruff_format"]
 lint = ["ruff", "ty"]
 test = ["test-py310", "test-py311", "test-py312", "test-py313", "test-py314"]
+test-target = ["test-py310"]
 
 [tool.poe.tasks.test-py310]
-cmd = "pytest --cov --cov-append --cov-report=xml --junitxml=junit.xml"
+cmd = "pytest --cov --cov-report=xml:coverage-3.10.xml"
 executor = {isolated = true, python = "3.10"}
 
 [tool.poe.tasks.test-py311]
-cmd = "pytest --cov --cov-append --cov-report=xml --junitxml=junit.xml"
+cmd = "pytest --cov --cov-report=xml:coverage-3.11.xml"
 executor = {isolated = true, python = "3.11"}
 
 [tool.poe.tasks.test-py312]
-cmd = "pytest --cov --cov-append --cov-report=xml --junitxml=junit.xml"
+cmd = "pytest --cov --cov-report=xml:coverage-3.12.xml"
 executor = {isolated = true, python = "3.12"}
 
 [tool.poe.tasks.test-py313]
-cmd = "pytest --cov --cov-append --cov-report=xml --junitxml=junit.xml"
+cmd = "pytest --cov --cov-report=xml:coverage-3.13.xml"
 executor = {isolated = true, python = "3.13"}
 
 [tool.poe.tasks.test-py314]
-cmd = "pytest --cov --cov-append --cov-report=xml --junitxml=junit.xml"
+cmd = "pytest --cov --cov-report=xml:coverage-3.14.xml"
 executor = {isolated = true, python = "3.14"}
