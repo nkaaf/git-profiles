@@ -23,10 +23,9 @@ import shutil
 import subprocess
 import sys
 import tempfile
-import typing
 from io import StringIO
 from pathlib import Path
-from typing import Any
+from typing import TextIO
 
 from faker import Faker
 
@@ -87,7 +86,7 @@ def with_tempfile(func):  # noqa: ANN001, ANN201
 
 
 def _execute(
-    temp_file: typing.IO[Any],
+    temp_file: TextIO,
     commands: list[str],
     *,
     in_dir: Path | None = None,
@@ -122,7 +121,7 @@ def _execute(
 
 @with_tempfile
 def execute(
-    temp_file: typing.IO[Any],
+    temp_file: TextIO,
     commands: list[str] | str,
     *,
     in_dir: Path | None = None,
@@ -133,7 +132,7 @@ def execute(
 
 @with_tempfile
 def execute_transaction(
-    temp_file: typing.IO[Any],
+    temp_file: TextIO,
     command_sets: list[list[str]],
     *,
     in_dir: Path | None = None,
@@ -144,16 +143,20 @@ def execute_transaction(
 
 
 @with_tempfile
-def execute_via_git(temp_file: typing.IO[Any], commands: list[str] | str) -> str:
+def execute_via_git(temp_file: TextIO, commands: list[str] | str) -> str:
     commands = [commands] if isinstance(commands, str) else commands
+
+    assert GIT_EXECUTABLE is not None
 
     args = [GIT_EXECUTABLE, 'profiles', '--storage', temp_file.name, *commands]
     return subprocess.check_output(args).decode(ENCODING)  # noqa: S603
 
 
 @with_tempfile
-def execute_via_module(temp_file: typing.IO[Any], commands: list[str] | str) -> str:
+def execute_via_module(temp_file: TextIO, commands: list[str] | str) -> str:
     commands = [commands] if isinstance(commands, str) else commands
+
+    assert PYTHON_EXECUTABLE is not None
 
     args = [
         PYTHON_EXECUTABLE,
