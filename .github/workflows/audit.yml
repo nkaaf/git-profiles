@@ -44,10 +44,10 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6.3.0
 
-      - name: Explicit install git
+      - name: Install software required for codecov/codecov-action
         uses: awalsh128/cache-apt-pkgs-action@553a35bb8ebd9fcabcb1c9451aa4c98e1b4ca8a9 # v1.6.3
         with:
-          packages: git
+          packages: bash curl git gpg
 
       - name: Install uv
         uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
