@@ -1,11 +1,28 @@
 version: 2
 updates:
+  - package-ecosystem: devcontainers
+    directory: "/"
+    schedule:
+      interval: daily
+    groups:
+      devcontainers-dependencies:
+        patterns:
+          - "*"
+
+  - package-ecosystem: uv
+    directory: "/"
+    schedule:
+      interval: daily
+    groups:
+      python-dependencies:
+        patterns:
+          - "*"
+
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
-  - package-ecosystem: "uv"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    patterns: ["*"]
+      interval: daily
+    groups:
+      github-actions-dependencies:
+        patterns:
+          - "*"
