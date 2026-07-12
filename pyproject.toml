@@ -9,7 +9,7 @@ maintainers = [
     { name = "Niklas Kaaf", email = "nkaaf@protonmail.com" }
 ]
 readme = "README.md"
-requires-python = ">=3.10,<=3.14"
+requires-python = ">=3.10,<3.15"
 keywords = ["git", "cli", "profiles", "configuration", "developer", "tools"]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -48,14 +48,12 @@ git-profiles = "git_profiles.__main__:main"
 dev = [
     "faker==37.12.0",
     "mypy==1.18.2",
-    "poethepoet==0.37.0",
+    "poethepoet==0.48.0",
     "pre-commit==4.6.0",
-    "pytest==9.0.0",
-    "pytest-cov==7.0.0",
-    "ruff==0.14.1",
-    "tox==4.31.0",
-    "tox-uv==1.29.0",
-    "uv-build==0.9.7",
+    "pytest==9.1.1",
+    "pytest-cov==7.1.0",
+    "ruff==0.15.21",
+    "uv-build==0.11.28",
 ]
 
 [build-system]
@@ -94,14 +92,6 @@ minversion = "9.0.0"
 testpaths = ["tests"]
 strict = true
 
-[tool.tox]
-requires = ["tox-uv"]
-envlist = ["py310", "py311", "py312", "py313", "py314"]
-
-[tool.tox.env_run_base]
-package = "editable"
-commands = [["pytest", "--cov", "--cov-append", "--cov-report=term-missing", "--cov-report=xml", "--junitxml=junit.xml"]]
-
 [tool.coverage.run]
 source = ["src"]
 
@@ -128,8 +118,32 @@ strict = true
 mypy = "mypy"
 ruff_check = "ruff check"
 ruff_format = "ruff format"
-tox = "tox"
 pre-commit = "pre-commit run --all-files"
 ruff = ["ruff_check", "ruff_format"]
 lint = ["mypy", "ruff"]
-test = ["tox"]
+
+[tool.poe.executor]
+type = "uv"
+
+[tool.poe.tasks.test-py310]
+cmd = "pytest --cov --cov-append --cov-report=xml --junitxml=junit.xml"
+executor = {isolated = true, python = "3.10"}
+
+[tool.poe.tasks.test-py311]
+cmd = "pytest --cov --cov-append --cov-report=xml --junitxml=junit.xml"
+executor = {isolated = true, python = "3.11"}
+
+[tool.poe.tasks.test-py312]
+cmd = "pytest --cov --cov-append --cov-report=xml --junitxml=junit.xml"
+executor = {isolated = true, python = "3.12"}
+
+[tool.poe.tasks.test-py313]
+cmd = "pytest --cov --cov-append --cov-report=xml --junitxml=junit.xml"
+executor = {isolated = true, python = "3.13"}
+
+[tool.poe.tasks.test-py314]
+cmd = "pytest --cov --cov-append --cov-report=xml --junitxml=junit.xml"
+executor = {isolated = true, python = "3.14"}
+
+[tool.poe.tasks.test]
+sequence = ["test-py310", "test-py311", "test-py312", "test-py313", "test-py314"]
