@@ -20,11 +20,7 @@ jobs:
         uses: actions/setup-python@v6.1.0
 
       - name: Install uv
-        uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
-        with:
-          enable-cache: true
-          save-cache: true
-          restore-cache: true
+        uses: astral-sh/setup-uv@v7.1.6
 
       - name: Install project dependencies
         run: |
@@ -53,11 +49,7 @@ jobs:
           packages: git
 
       - name: Install uv
-        uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
-        with:
-          enable-cache: true
-          save-cache: true
-          restore-cache: true
+        uses: astral-sh/setup-uv@v7.1.6
 
       - name: Install project dependencies
         run: |
@@ -95,11 +87,7 @@ jobs:
         uses: actions/checkout@v6.0.1
 
       - name: Install uv
-        uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
-        with:
-          enable-cache: true
-          save-cache: true
-          restore-cache: true
+        uses: astral-sh/setup-uv@v7.1.6
 
       - name: Audit
         uses: pypa/gh-action-pip-audit@1220774d901786e6f652ae159f7b6bc8fea6d266 # v1.1.0
