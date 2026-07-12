@@ -1,6 +1,6 @@
 [project]
 name = "git-profiles"
-version = "0.2.0"
+version = "0.3.0"
 description = "CLI tool to manage multiple Git configuration profiles"
 authors = [
     { name = "Niklas Kaaf", email = "nkaaf@protonmail.com" }
@@ -9,14 +9,13 @@ maintainers = [
     { name = "Niklas Kaaf", email = "nkaaf@protonmail.com" }
 ]
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.10,<=3.14"
 keywords = ["git", "cli", "profiles", "configuration", "developer", "tools"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Topic :: Software Development :: Version Control",
     "Topic :: Utilities",
-    "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -31,37 +30,41 @@ license-files = [
 ]
 
 dependencies = [
-    "filelock>=3.20.0",
-    "platformdirs>=4.5.0",
-    "pydantic>=2.12.2",
-    "typing-extensions>=4.15.0",
+    "filelock==3.20.0",
+    "platformdirs==4.5.0",
+    "pydantic==2.12.2",
+    "typing-extensions==4.15.0",
 ]
 
 [project.urls]
-Repository = "https://github.com/nkaaf/git-profiles"
-"Bug Tracker" = "https://github.com/nkaaf/git-profiles/issues"
-Releases = "https://github.com/nkaaf/git-profiles/releases"
+homepage = "https://github.com/nkaaf/git-profiles"
+source = "https://github.com/nkaaf/git-profiles"
+issues = "https://github.com/nkaaf/git-profiles/issues"
 
 [project.scripts]
 git-profiles = "git_profiles.__main__:main"
 
 [dependency-groups]
 dev = [
-    "faker>=37.12.0",
-    "mypy>=1.18.2",
-    "poethepoet>=0.37.0",
-    "pre-commit>=2.21.0",
-    "pytest>=9.0.0",
-    "pytest-cov>=7.0.0",
-    "ruff>=0.14.1",
-    "tox>=4.31.0",
-    "tox-uv>=1.29.0",
-    "uv-build>=0.9.7",
+    "faker==37.12.0",
+    "mypy==1.18.2",
+    "poethepoet==0.37.0",
+    "pre-commit==4.6.0",
+    "pytest==9.0.0",
+    "pytest-cov==7.0.0",
+    "ruff==0.14.1",
+    "tox==4.31.0",
+    "tox-uv==1.29.0",
+    "uv-build==0.9.7",
 ]
 
 [build-system]
-requires = ["uv_build"]
+requires = ["uv_build==0.9.7"]
 build-backend = "uv_build"
+
+[tool.uv]
+package = true
+add-bounds = "exact"
 
 [tool.uv.build-backend]
 package = true
@@ -87,7 +90,7 @@ convention = "google"
 "tests/*" = ["D", "INP001", "S101", "PLR2004"]
 
 [tool.pytest]
-minversion = "9.0"
+minversion = "9.0.0"
 testpaths = ["tests"]
 strict = true
 
@@ -102,7 +105,7 @@ commands = [["pytest", "--cov", "--cov-append", "--cov-report=term-missing", "--
 [tool.coverage.run]
 source = ["src"]
 
-# https://coverage.readthedocs.io/en/7.11.0/excluding.html#advanced-exclusion
+# https://coverage.readthedocs.io/en/7.15.0/excluding.html#advanced-exclusion
 [tool.coverage.report]
 exclude_also = [
     'def __repr__',
