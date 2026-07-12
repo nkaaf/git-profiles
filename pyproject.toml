@@ -45,15 +45,18 @@ issues = "https://github.com/nkaaf/git-profiles/issues"
 git-profiles = "git_profiles.__main__:main"
 
 [dependency-groups]
+build = [
+    "uv-build==0.11.28",
+]
 dev = [
     "faker==37.12.0",
-    "mypy==1.18.2",
     "poethepoet==0.48.0",
     "pre-commit==4.6.0",
     "pytest==9.1.1",
     "pytest-cov==7.1.0",
     "ruff==0.15.21",
-    "uv-build==0.11.28",
+    "ty==0.0.58",
+    { "include-group" = "build" }
 ]
 
 [build-system]
@@ -110,20 +113,17 @@ exclude_also = [
     '@(abc\.)?abstractmethod',
 ]
 
-[tool.mypy]
-files = ["src"]
-strict = true
+[tool.poe.executor]
+type = "uv"
 
 [tool.poe.tasks]
-mypy = "mypy"
+ty = "ty check"
 ruff_check = "ruff check"
 ruff_format = "ruff format"
 pre-commit = "pre-commit run --all-files"
 ruff = ["ruff_check", "ruff_format"]
-lint = ["mypy", "ruff"]
-
-[tool.poe.executor]
-type = "uv"
+lint = ["ruff", "ty"]
+test = ["test-py310", "test-py311", "test-py312", "test-py313", "test-py314"]
 
 [tool.poe.tasks.test-py310]
 cmd = "pytest --cov --cov-append --cov-report=xml --junitxml=junit.xml"
@@ -144,6 +144,3 @@ executor = {isolated = true, python = "3.13"}
 [tool.poe.tasks.test-py314]
 cmd = "pytest --cov --cov-append --cov-report=xml --junitxml=junit.xml"
 executor = {isolated = true, python = "3.14"}
-
-[tool.poe.tasks.test]
-sequence = ["test-py310", "test-py311", "test-py312", "test-py313", "test-py314"]
