@@ -44,9 +44,9 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from git_profiles.const import PROGRAM_NAME
-from git_profiles.output import Outputter
-from git_profiles.storage import (
+from .const import PROGRAM_NAME
+from .output import Outputter
+from .storage import (
     DictMergeConflictError,
     Storage,
     StorageError,

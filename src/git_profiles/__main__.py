@@ -25,7 +25,7 @@ to parse arguments and execute commands. It also manages exit codes:
 
 import sys
 
-from git_profiles.cli import Cli, ExitError
+from .cli import Cli, ExitError
 
 
 def main() -> int:

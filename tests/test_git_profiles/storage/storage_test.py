@@ -16,12 +16,11 @@
 
 import json
 import tempfile
-from collections.abc import Generator, Sequence
+from collections.abc import Generator
 from pathlib import Path
-from typing import Any
 
-import filelock
 import pytest
+from filelock import FileLock
 
 from git_profiles.storage import (
     ConfigLoadError,
@@ -81,14 +80,14 @@ def test_file_lock_variable() -> None:
                 cls.COUNTER += 1
 
         # Mock acquire function to check if it was called and the lockfile exists
-        filelock.FileLock.acquire_original = filelock.FileLock.acquire
+        FileLock.acquire_original = FileLock.acquire  # ty:ignore[unresolved-attribute]
 
-        def mock_acquire(*args: Sequence[...], **kwargs: dict[str, Any]) -> None:
+        def mock_acquire(*args, **kwargs) -> None:  # noqa: ANN002, ANN003
             Counter.inc()
-            filelock.FileLock.acquire_original(*args, **kwargs)
+            FileLock.acquire_original(*args, **kwargs)  # ty:ignore[unresolved-attribute]
             assert lock_file_path.is_file()
 
-        filelock.FileLock.acquire = mock_acquire
+        FileLock.acquire = mock_acquire  # ty:ignore[invalid-assignment]
 
         # The operation that triggers a locking
         _unused_config = storage.config
@@ -97,8 +96,8 @@ def test_file_lock_variable() -> None:
 
     assert not lock_file_path.is_file()
 
-    filelock.FileLock.acquire = filelock.FileLock.acquire_original
-    del filelock.FileLock.acquire_original
+    FileLock.acquire = FileLock.acquire_original  # ty:ignore[unresolved-attribute]
+    del FileLock.acquire_original  # ty:ignore[unresolved-attribute]
 
 
 def test_file_lock_timeout() -> None:

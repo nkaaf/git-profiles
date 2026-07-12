@@ -42,7 +42,7 @@ from pydantic import RootModel
 from pydantic import ValidationError as PydanticValidationError
 from typing_extensions import Self
 
-from git_profiles.const import PROGRAM_NAME
+from .const import PROGRAM_NAME
 
 __all__ = ['DictMergeConflictError', 'Storage', 'StorageError']
 
