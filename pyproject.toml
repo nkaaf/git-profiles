@@ -46,21 +46,21 @@ git-profiles = "git_profiles.__main__:main"
 
 [dependency-groups]
 build = [
-    "uv-build==0.11.28",
+    "uv-build==0.11.29",
 ]
 dev = [
-    "faker==40.28.1",
+    "faker==40.31.0",
     "poethepoet==0.48.0",
     "pre-commit==4.6.0",
     "pytest==9.1.1",
     "pytest-cov==7.1.0",
     "ruff==0.15.21",
-    "ty==0.0.58",
+    "ty==0.0.59",
     { "include-group" = "build" }
 ]
 
 [build-system]
-requires = ["uv_build==0.9.7"]
+requires = ["uv_build==0.11.29"]
 build-backend = "uv_build"
 
 [tool.uv]
