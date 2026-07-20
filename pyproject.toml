@@ -30,8 +30,8 @@ license-files = [
 ]
 
 dependencies = [
-    "filelock==3.30.2",
-    "platformdirs==4.10.0",
+    "filelock==3.31.0",
+    "platformdirs==4.10.1",
     "pydantic==2.13.4",
     "typing-extensions==4.16.0",
 ]
@@ -55,7 +55,7 @@ dev = [
     "pytest==9.1.1",
     "pytest-cov==7.1.0",
     "ruff==0.15.22",
-    "ty==0.0.60",
+    "ty==0.0.61",
     { "include-group" = "build" }
 ]
 
