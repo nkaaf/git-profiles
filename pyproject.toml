@@ -30,7 +30,7 @@ license-files = [
 ]
 
 dependencies = [
-    "filelock==3.31.0",
+    "filelock==3.31.1",
     "platformdirs==4.10.1",
     "pydantic==2.13.4",
     "typing-extensions==4.16.0",
@@ -46,10 +46,10 @@ git-profiles = "git_profiles.__main__:main"
 
 [dependency-groups]
 build = [
-    "uv-build==0.11.29",
+    "uv-build==0.11.30",
 ]
 dev = [
-    "faker==40.31.0",
+    "faker==40.32.0",
     "poethepoet==0.48.0",
     "pre-commit==4.6.0",
     "pytest==9.1.1",
@@ -60,7 +60,7 @@ dev = [
 ]
 
 [build-system]
-requires = ["uv_build==0.11.29"]
+requires = ["uv_build==0.11.30"]
 build-backend = "uv_build"
 
 [tool.uv]
