@@ -30,8 +30,8 @@ license-files = [
 ]
 
 dependencies = [
-    "filelock==3.31.1",
-    "platformdirs==4.10.1",
+    "filelock==3.32.0",
+    "platformdirs==4.11.0",
     "pydantic==2.13.4",
     "typing-extensions==4.16.0",
 ]
@@ -51,7 +51,7 @@ build = [
 dev = [
     "faker==40.32.0",
     "poethepoet==0.48.0",
-    "pre-commit==4.6.0",
+    "pre-commit==4.6.1",
     "pytest==9.1.1",
     "pytest-cov==7.1.0",
     "ruff==0.15.22",
