@@ -1,22 +1,23 @@
 name: "CodeQL"
 
 on:
-  workflow_dispatch:
-  pull_request:
-    branches: [ "main" ]
+  push:
+    branches:
+      - main
+  workflow_dispatch: { }
+  pull_request: { }
 
 jobs:
   create-matrix:
     runs-on: ubuntu-latest
     permissions:
       security-events: write
-      contents: read
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: Get languages from repo
         id: set-matrix
-        uses: advanced-security/set-codeql-language-matrix@v1
+        uses: advanced-security/set-codeql-language-matrix@v1.6.0
         with:
           access-token: ${{ secrets.GITHUB_TOKEN }}
           endpoint: ${{ github.event.repository.languages_url }}
@@ -36,18 +37,20 @@ jobs:
       matrix: ${{ fromJSON(needs.create-matrix.outputs.matrix) }}
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
+    - name: Checkout repository
+      uses: actions/checkout@v7.0.1
 
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4
-        with:
-          languages: ${{ matrix.language }}
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v4.37.8
+      with:
+        languages: ${{ matrix.language }}
+        build-mode: ${{ matrix.build-mode }}
+        queries: security-and-quality,security-extended
 
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v4
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v4.37.8
 
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4
-        with:
-          category: "/language:${{matrix.language}}"
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v4.37.8
+      with:
+        category: "/language:${{matrix.language}}"
