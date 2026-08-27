@@ -1,28 +1,28 @@
 version: 2
+
+multi-ecosystem-groups:
+  infrastructure:
+    schedule:
+      interval: "weekly"
+
 updates:
   - package-ecosystem: devcontainers
-    directory: "/"
-    schedule:
-      interval: daily
-    groups:
-      devcontainers-dependencies:
-        patterns:
-          - "*"
+    directory: /
+    multi-ecosystem-group: infrastructure
+    patterns:
+      - *
 
   - package-ecosystem: uv
-    directory: "/"
+    directory: /
     schedule:
-      interval: daily
+      interval: weekly
     groups:
       python-dependencies:
         patterns:
-          - "*"
+          - *
 
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: daily
-    groups:
-      github-actions-dependencies:
-        patterns:
-          - "*"
+  - package-ecosystem: github-actions
+    directory: /
+    multi-ecosystem-group: infrastructure
+    patterns:
+      - *

@@ -1,55 +1,53 @@
 name: "CodeQL"
 
 on:
-  push:
-  pull_request:
   workflow_dispatch:
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
-  codeql-python:
-    name: "CodeQL Python Scan"
+  create-matrix:
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Get languages from repo
+        id: set-matrix
+        uses: advanced-security/set-codeql-language-matrix@v1
+        with:
+          access-token: ${{ secrets.GITHUB_TOKEN }}
+          endpoint: ${{ github.event.repository.languages_url }}
+
+  analyze:
+    needs: create-matrix
+    if: ${{ needs.create-matrix.outputs.matrix != '[]' }}
+    name: Analyze
+    runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
     permissions:
       actions: read
       contents: read
       security-events: write
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v7.0.1
-
-      - name: Initialize CodeQL (Python)
-        uses: github/codeql-action/init@v4.37.3
-        with:
-          languages: python
-          queries: security-and-quality,security-extended
-
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v4.37.3
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4.37.3
-
-  codeql-actions:
-    name: "CodeQL GitHub Actions Scan"
-    runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.create-matrix.outputs.matrix) }}
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v7.0.1
+      - name: Checkout repository
+        uses: actions/checkout@v6
 
-      - name: Initialize CodeQL (Actions)
-        uses: github/codeql-action/init@v4.37.3
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
         with:
-          languages: actions
-          queries: security-and-quality,security-extended
+          languages: ${{ matrix.language }}
 
       - name: Autobuild
-        uses: github/codeql-action/autobuild@v4.37.3
+        uses: github/codeql-action/autobuild@v4
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4.37.3
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:${{matrix.language}}"
