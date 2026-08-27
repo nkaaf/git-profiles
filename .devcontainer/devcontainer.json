@@ -1,21 +1,8 @@
 {
   "name": "Git Profiles",
-  "image": "mcr.microsoft.com/devcontainers/base",
+  "image": "mcr.microsoft.com/devcontainers/python:3.2.1-3.10-trixie@sha256:073c1597e3d2d0907339dfa3681ff3d5b4fd6cc2ffe325f71c5370f3e83d7b5c",
   "features": {
-    "ghcr.io/devcontainers/features/python:1": {},
-    "ghcr.io/devcontainers-extra/features/ruff:2": {
-      "version": "0.15.19"
-    },
-    "ghcr.io/devcontainers-extra/features/ty:1": {
-      "version": "0.0.53"
-    },
-    "ghcr.io/devcontainers-extra/features/uv:1": {
-      "version": "0.11.24"
-    }
+    "ghcr.io/devcontainers-extra/features/uv:1": {}
   },
-  "containerEnv": {
-    "UV_CACHE_DIR": ".uv_cache",
-    "UV_PYTHON_CACHE_DIR": ".uv_cache"
-  },
-  "postAttachCommand": "sh .devcontainer/setup.sh"
+  "postAttachCommand": ".devcontainer/postAttach.sh"
 }

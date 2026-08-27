@@ -1,11 +1,11 @@
-# Python-generated files
+# Python
 __pycache__/
 
-# Virtual environments
-.venv
-
 # Jetbrains
-.idea
+.idea/*
+!.idea/pyLspTools.xml
+!.idea/jsonSchemas.xml
+!.idea/runConfigurations/
 
 # Pytest
 .coverage
