@@ -3,7 +3,7 @@ version: 2
 multi-ecosystem-groups:
   infrastructure:
     schedule:
-      interval: "weekly"
+      interval: weekly
 
 updates:
   - package-ecosystem: devcontainers
